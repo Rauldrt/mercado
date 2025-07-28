@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
-import { CartSheet } from '@/components/cart/cart-sheet';
 import { useState } from 'react';
 import {
   Sheet,
@@ -17,7 +16,6 @@ import {
 export default function Header() {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const [isCartOpen, setCartOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -50,16 +48,16 @@ export default function Header() {
               <span className="sr-only">Lista de deseos</span>
             </Link>
           </Button>
-
-          <CartSheet open={isCartOpen} onOpenChange={setCartOpen}>
-            <Button variant="ghost" size="icon" onClick={() => setCartOpen(true)}>
+          
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/checkout">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">{cartCount}</span>
               )}
               <span className="sr-only">Carrito de compras</span>
-            </Button>
-          </CartSheet>
+            </Link>
+          </Button>
 
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
             <User className="h-5 w-5" />
