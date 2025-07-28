@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -8,6 +9,7 @@ import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import CategoryCarousel from '@/components/products/category-carousel';
 
 
 export default function Home() {
@@ -20,6 +22,10 @@ export default function Home() {
     const allCategories = allProducts.map(p => p.category);
     return ['all', ...Array.from(new Set(allCategories))];
   }, []);
+
+  const carouselCategories = useMemo(() => {
+    return categories.filter(c => c !== 'all');
+  }, [categories]);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter(product => {
@@ -50,8 +56,21 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Nuestros Productos</h1>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Nuestros Productos</h1>
+        <p className="text-muted-foreground mt-2">Explora nuestro catálogo completo</p>
+      </div>
+
+      <CategoryCarousel 
+        categories={carouselCategories}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
+
+      <div className="flex justify-between items-center mb-6 mt-12">
+        <h2 className="text-2xl font-bold tracking-tight font-headline">
+          {selectedCategory === 'all' ? 'Todos los Productos' : selectedCategory}
+        </h2>
         <div className="flex items-center gap-4">
             <p className="text-sm text-muted-foreground hidden sm:block">{filteredProducts.length} resultados</p>
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
