@@ -14,35 +14,21 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "../ui/button"
 import Image from "next/image"
 import Link from "next/link"
-
-const promotions = [
-  {
-    title: "25% OFF en Calzado",
-    description: "Renueva tu estilo con nuestra última colección. ¡Solo por tiempo limitado!",
-    imageUrl: "https://placehold.co/800x400.png",
-    imageHint: "shoes sale",
-    link: "#"
-  },
-  {
-    title: "Envío Gratis a todo el país",
-    description: "En todas las compras superiores a $150.000. ¡No te lo pierdas!",
-    imageUrl: "https://placehold.co/800x400.png",
-    imageHint: "delivery truck",
-    link: "#"
-  },
-    {
-    title: "Tecnología y Hogar",
-    description: "Descubre las mejores ofertas en electrónica para tu casa.",
-    imageUrl: "https://placehold.co/800x400.png",
-    imageHint: "modern living room",
-    link: "#"
-  },
-]
+import { promotions as allPromotions } from "@/lib/promotions"
+import type { Promotion } from "@/lib/types"
 
 export default function PromotionsCard() {
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   )
+  
+  // In a real app, this would be fetched from the admin state,
+  // but for now we'll use the static data.
+  const [promotions, setPromotions] = React.useState<Promotion[]>(allPromotions);
+
+  if (promotions.length === 0) {
+    return null;
+  }
 
   return (
     <Carousel

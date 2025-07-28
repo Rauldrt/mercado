@@ -30,3 +30,12 @@ export type Customer = {
     total: number;
   }[];
 };
+
+export type Promotion = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  imageHint: string;
+  link: string;
+};
