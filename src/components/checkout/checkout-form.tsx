@@ -26,7 +26,7 @@ const formSchema = z.object({
   address: z.string().min(5, { message: 'Dirección muy corta.' }),
   city: z.string().min(3, { message: 'Ciudad muy corta.' }),
   zip: z.string().min(4, { message: 'Código postal inválido.' }),
-  paymentMethod: z.enum(['digital_wallet', 'credit_card'], {
+  paymentMethod: z.enum(['digital_wallet', 'credit_card', 'cash'], {
     required_error: "Debes seleccionar un método de pago."
   }),
   createAccount: z.boolean().default(false).optional(),
@@ -128,6 +128,10 @@ export default function CheckoutForm() {
                             <FormItem className="flex items-center space-x-3 space-y-0">
                                 <FormControl><RadioGroupItem value="credit_card" /></FormControl>
                                 <FormLabel className="font-normal">Tarjeta de Crédito / Débito</FormLabel>
+                            </FormItem>
+                             <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl><RadioGroupItem value="cash" /></FormControl>
+                                <FormLabel className="font-normal">Contado Efectivo</FormLabel>
                             </FormItem>
                             </RadioGroup>
                         </FormControl>
