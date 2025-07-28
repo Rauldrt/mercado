@@ -1,7 +1,9 @@
 
 "use client";
 
-import { products } from "@/lib/products";
+import { useState } from "react";
+import { products as initialProducts } from "@/lib/products";
+import type { Product } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -17,15 +19,72 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
 import Image from "next/image";
+import ProductForm from "./product-form";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProductsTable() {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isFormOpen, setFormOpen] = useState(false);
+  const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleOpenForm = (product: Product | null) => {
+    setSelectedProduct(product);
+    setFormOpen(true);
+  };
+
+  const handleOpenDeleteAlert = (product: Product) => {
+    setSelectedProduct(product);
+    setDeleteAlertOpen(true);
+  };
+
+  const handleProductSave = (productData: Product) => {
+    if (selectedProduct) {
+      // Edit
+      setProducts(prev =>
+        prev.map(p => (p.id === productData.id ? productData : p))
+      );
+       toast({ title: "Producto Actualizado", description: `"${productData.name}" se ha actualizado correctamente.` });
+    } else {
+      // Add
+      setProducts(prev => [...prev, productData]);
+       toast({ title: "Producto Creado", description: `"${productData.name}" se ha añadido a tu tienda.` });
+    }
+    setFormOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleDeleteProduct = () => {
+    if (selectedProduct) {
+      setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+      toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
+    }
+    setDeleteAlertOpen(false);
+    setSelectedProduct(null);
+  };
+
   return (
     <div>
-       <div className="flex justify-end mb-4">
-        <Button>Añadir Producto</Button>
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => handleOpenForm(null)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Añadir Producto
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -74,11 +133,12 @@ export default function AdminProductsTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleOpenForm(product)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                       <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleOpenDeleteAlert(product)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </DropdownMenuItem>
@@ -90,6 +150,45 @@ export default function AdminProductsTable() {
           </TableBody>
         </Table>
       </div>
+
+       {/* Form Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setFormOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{selectedProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'}</DialogTitle>
+            <DialogDescription>
+              {selectedProduct ? 'Modifica los detalles de tu producto.' : 'Completa el formulario para añadir un producto a tu tienda.'}
+            </DialogDescription>
+          </DialogHeader>
+          <ProductForm
+            product={selectedProduct}
+            onSave={handleProductSave}
+            onCancel={() => setFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+       <Dialog open={isDeleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Estás seguro que deseas eliminar?</DialogTitle>
+            <DialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente el producto
+              <span className="font-bold"> "{selectedProduct?.name}"</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+                <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDeleteProduct}>
+              Sí, eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
