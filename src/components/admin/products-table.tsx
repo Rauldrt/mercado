@@ -35,6 +35,7 @@ import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function AdminProductsTable() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -153,18 +154,18 @@ export default function AdminProductsTable() {
 
        {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedProduct ? 'Editar Producto' : 'Añadir Nuevo Producto'}</DialogTitle>
             <DialogDescription>
               {selectedProduct ? 'Modifica los detalles de tu producto.' : 'Completa el formulario para añadir un producto a tu tienda.'}
             </DialogDescription>
           </DialogHeader>
-          <ProductForm
-            product={selectedProduct}
-            onSave={handleProductSave}
-            onCancel={() => setFormOpen(false)}
-          />
+            <ProductForm
+                product={selectedProduct}
+                onSave={handleProductSave}
+                onCancel={() => setFormOpen(false)}
+            />
         </DialogContent>
       </Dialog>
       

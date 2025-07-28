@@ -153,7 +153,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
         
         {/* Image URLs */}
         <div className="space-y-4 rounded-md border p-4">
-          <h4 className="font-medium">URLs de Imágenes</h4>
+          <FormLabel>URLs de Imágenes</FormLabel>
           {imageUrlFields.map((field, index) => (
              <FormField
                 key={field.id}
@@ -184,7 +184,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
 
         {/* Specifications */}
         <div className="space-y-4 rounded-md border p-4">
-           <h4 className="font-medium">Especificaciones</h4>
+           <FormLabel>Especificaciones</FormLabel>
            {specFields.map((field, index) => (
             <div key={field.id} className="flex items-start gap-2">
                 <FormField
