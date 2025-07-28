@@ -45,6 +45,9 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
       <Link href="/#products" className={linkClass("/#products")} onClick={handleLinkClick}>
         Productos
       </Link>
+      <Link href="/checkout" className={linkClass("/checkout")} onClick={handleLinkClick}>
+        Checkout
+      </Link>
     </nav>
   );
 }
