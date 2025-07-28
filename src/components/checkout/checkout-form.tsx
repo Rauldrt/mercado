@@ -29,6 +29,8 @@ const formSchema = z.object({
   address: z.string().min(5, { message: 'Dirección muy corta.' }),
   city: z.string().min(3, { message: 'Ciudad muy corta.' }),
   zip: z.string().min(4, { message: 'Código postal inválido.' }),
+  phoneNumber: z.string().optional(),
+  gpsLocation: z.string().optional(),
   paymentMethod: z.enum(['digital_wallet', 'credit_card', 'cash'], {
     required_error: "Debes seleccionar un método de pago."
   }),
@@ -66,6 +68,8 @@ export default function CheckoutForm({
       address: '',
       city: '',
       zip: '',
+      phoneNumber: '',
+      gpsLocation: '',
       createAccount: false,
     },
   });
@@ -141,6 +145,14 @@ export default function CheckoutForm({
                     )} />
                     <FormField control={form.control} name="zip" render={({ field }) => (
                         <FormItem><FormLabel>Código Postal</FormLabel><FormControl><Input placeholder="C1043AAV" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="phoneNumber" render={({ field }) => (
+                        <FormItem><FormLabel>Teléfono (Opcional)</FormLabel><FormControl><Input placeholder="+54 9 11..." {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="gpsLocation" render={({ field }) => (
+                        <FormItem><FormLabel>GPS (Opcional)</FormLabel><FormControl><Input placeholder="Lat, Long" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
                  <FormField control={form.control} name="createAccount" render={({ field }) => (

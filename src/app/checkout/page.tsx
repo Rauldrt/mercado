@@ -49,6 +49,8 @@ export default function CheckoutPage() {
         address: data.address,
         city: data.city,
         zip: data.zip,
+        phoneNumber: data.phoneNumber,
+        gpsLocation: data.gpsLocation,
         purchaseHistory: [{
           orderId: uuidv4(),
           date: new Date().toISOString(),

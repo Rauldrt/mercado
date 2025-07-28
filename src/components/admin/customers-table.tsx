@@ -90,7 +90,7 @@ export default function AdminCustomersTable() {
             <TableRow>
               <TableHead>Nombre Completo</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead className="hidden md:table-cell">Dirección</TableHead>
+              <TableHead className="hidden md:table-cell">Teléfono</TableHead>
               <TableHead className="hidden md:table-cell">Compras</TableHead>
               <TableHead>
                 <span className="sr-only">Acciones</span>
@@ -102,7 +102,7 @@ export default function AdminCustomersTable() {
               <TableRow key={customer.id}>
                 <TableCell className="font-medium">{`${customer.firstName} ${customer.lastName}`}</TableCell>
                 <TableCell>{customer.email}</TableCell>
-                <TableCell className="hidden md:table-cell">{`${customer.address}, ${customer.city}`}</TableCell>
+                <TableCell className="hidden md:table-cell">{customer.phoneNumber || 'N/A'}</TableCell>
                 <TableCell className="hidden md:table-cell">{customer.purchaseHistory.length}</TableCell>
                 <TableCell>
                   <DropdownMenu>

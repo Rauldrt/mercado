@@ -25,6 +25,8 @@ const formSchema = z.object({
   address: z.string().min(5, { message: 'La dirección debe tener al menos 5 caracteres.' }),
   city: z.string().min(3, { message: 'La ciudad debe tener al menos 3 caracteres.' }),
   zip: z.string().min(4, { message: 'El código postal debe tener al menos 4 caracteres.' }),
+  phoneNumber: z.string().optional(),
+  gpsLocation: z.string().optional(),
 });
 
 interface CustomerFormProps {
@@ -43,6 +45,8 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
       address: customer?.address || '',
       city: customer?.city || '',
       zip: customer?.zip || '',
+      phoneNumber: customer?.phoneNumber || '',
+      gpsLocation: customer?.gpsLocation || '',
     },
   });
 
@@ -127,6 +131,30 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
               </FormItem>
             )}
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Teléfono (Opcional)</FormLabel>
+                    <FormControl><Input placeholder="+54 9 11..." {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="gpsLocation"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Ubicación GPS (Opcional)</FormLabel>
+                    <FormControl><Input placeholder="Lat, Long" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
         </div>
         
         <div className="flex justify-end gap-2 pt-4">

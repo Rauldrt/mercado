@@ -9,6 +9,8 @@ export const customers: Customer[] = [
     address: 'Av. Libertador 1234',
     city: 'Rosario',
     zip: 'S2000',
+    phoneNumber: '+54 9 341 123-4567',
+    gpsLocation: '-32.9478, -60.6303',
     purchaseHistory: [
       { orderId: 'ord_101', date: '2023-10-15T10:00:00Z', total: 155500.00 },
       { orderId: 'ord_102', date: '2024-03-22T14:30:00Z', total: 89999.99 },
@@ -22,6 +24,7 @@ export const customers: Customer[] = [
     address: 'Calle Falsa 456',
     city: 'Quilmes',
     zip: 'B1878',
+    phoneNumber: '+54 9 11 9876-5432',
     purchaseHistory: [
       { orderId: 'ord_103', date: '2024-05-01T18:00:00Z', total: 180000.00 },
     ],

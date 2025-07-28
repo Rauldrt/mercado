@@ -22,6 +22,8 @@ export type Customer = {
   address: string;
   city: string;
   zip: string;
+  phoneNumber?: string;
+  gpsLocation?: string;
   purchaseHistory: {
     orderId: string;
     date: string;
