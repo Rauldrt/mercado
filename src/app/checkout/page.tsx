@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, FileDown, MessageCircle } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const handleOrderSuccess = (data: any) => {
     setCustomerInfo(data);
     setShowPostOrderActions(true);
+    clearCart();
   };
 
   const handleDownloadPdf = () => {
@@ -66,6 +67,23 @@ export default function CheckoutPage() {
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
+    // Since the cart is cleared on success, we need to handle the case where cartItems is empty
+    // but we still want to show the summary for PDF/WhatsApp. We can use a state to hold the items
+    // at the moment of the order.
+    const [orderedItems, setOrderedItems] = useState([]);
+    const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
+
+    useEffect(() => {
+        if (showPostOrderActions) {
+            setOrderedItems(cartItems);
+            setOrderedTotalPrice(totalPrice);
+        }
+    }, [showPostOrderActions]);
+
+    const itemsToDisplay = showPostOrderActions ? orderedItems : cartItems;
+    const totalToDisplay = showPostOrderActions ? orderedTotalPrice : totalPrice;
+    const finalTotalToDisplay = totalToDisplay + shippingCost;
 
 
   return (
@@ -106,7 +124,7 @@ export default function CheckoutPage() {
                   </tr>
               </thead>
               <tbody>
-                  {cartItems.map(item => (
+                  {itemsToDisplay.map(item => (
                       <tr key={item.product.id}>
                           <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>{item.product.name}</td>
                           <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #EEE' }}>{item.quantity}</td>
@@ -120,7 +138,7 @@ export default function CheckoutPage() {
               <div style={{ width: '250px', fontSize: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span>Subtotal:</span>
-                      <span>${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(totalToDisplay)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span>Envío:</span>
@@ -128,7 +146,7 @@ export default function CheckoutPage() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', borderTop: '2px solid #EEE', paddingTop: '8px' }}>
                       <span>Total:</span>
-                      <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
                   </div>
               </div>
           </div>
@@ -147,7 +165,7 @@ export default function CheckoutPage() {
                     <CardTitle className="font-headline text-xl">Resumen de tu pedido</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {cartItems.map(item => (
+                    {itemsToDisplay.map(item => (
                         <div key={item.product.id} className="flex items-center gap-4">
                             <div className="relative h-16 w-16 rounded-md overflow-hidden">
                                 <Image 
@@ -161,6 +179,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="flex-grow space-y-1">
                                 <p className="font-medium">{item.product.name}</p>
+                                {!showPostOrderActions && (
                                 <div className="flex items-center gap-2">
                                      <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
                                         <Minus className="h-3 w-3" />
@@ -170,6 +189,7 @@ export default function CheckoutPage() {
                                         <Plus className="h-3 w-3" />
                                     </Button>
                                 </div>
+                                )}
                             </div>
                             <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
                         </div>
@@ -178,7 +198,7 @@ export default function CheckoutPage() {
                     <div className="space-y-2">
                        <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
+                            <span>${new Intl.NumberFormat('es-AR').format(totalToDisplay)}</span>
                        </div>
                         <div className="flex justify-between">
                             <span>Envío (estimado)</span>
@@ -189,10 +209,10 @@ export default function CheckoutPage() {
                 </CardContent>
                 <CardFooter className="pt-4 flex justify-between font-bold text-xl">
                     <span>Total</span>
-                    <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
+                    <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
                 </CardFooter>
             </Card>
-            {showPostOrderActions && cartItems.length > 0 && (
+            {showPostOrderActions && (
               <Card className="mt-4">
                 <CardHeader>
                   <CardTitle className="font-headline">Pedido Confirmado</CardTitle>
@@ -215,7 +235,7 @@ export default function CheckoutPage() {
             </p>
         </div>
         <div className="lg:order-1 mt-8 lg:mt-0">
-          <CheckoutForm onOrderSuccess={handleOrderSuccess} isSubmitDisabled={showPostOrderActions} />
+          <CheckoutForm onOrderSuccess={handleOrderSuccess} isSubmitDisabled={showPostOrderActions || cartCount === 0} />
         </div>
       </div>
     </div>
