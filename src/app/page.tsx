@@ -38,15 +38,27 @@ export default function Home() {
       return matchesCategory && matchesPrice && matchesSearch;
     });
   }, [searchQuery, selectedCategory, priceRange]);
+  
+  const handleCategorySelect = (category: string) => {
+    if (selectedCategory === category) {
+      setSelectedCategory('all'); // Toggle off if the same category is clicked
+    } else {
+      setSelectedCategory(category);
+    }
+  };
+
+  const handleFilterCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    if(isSheetOpen) {
+      setSheetOpen(false);
+    }
+  }
 
   const filtersComponent = (
       <ProductFilters
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategoryChange={(value) => {
-            setSelectedCategory(value);
-            setSheetOpen(false);
-        }}
+        onCategoryChange={handleFilterCategoryChange}
         priceRange={priceRange}
         onPriceChange={setPriceRange}
         searchQuery={searchQuery}
@@ -64,7 +76,7 @@ export default function Home() {
       <CategoryCarousel 
         categories={carouselCategories}
         selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
+        onCategorySelect={handleCategorySelect}
       />
 
       <div className="flex justify-between items-center mb-6 mt-12">
