@@ -8,17 +8,19 @@ import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, FileDown, MessageCircle } from 'lucide-react';
-import React, { useRef, useState, useEffect } from 'react';
+import { Plus, Minus } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { customers } from '@/lib/customers'; // Simulating customer database
+import { v4 as uuidv4 } from 'uuid';
+import type { Customer } from '@/lib/types';
 
 export default function CheckoutPage() {
   const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
   const [customerInfo, setCustomerInfo] = useState(null);
-  const orderSummaryRef = useRef<HTMLDivElement>(null);
-
+  
   // State to hold the order details at the moment of purchase
   const [orderedItems, setOrderedItems] = useState<typeof cartItems>([]);
   const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
@@ -37,6 +39,32 @@ export default function CheckoutPage() {
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
     setCustomerInfo(data);
+
+    if (data.createAccount) {
+      const newCustomer: Customer = {
+        id: uuidv4(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        address: data.address,
+        city: data.city,
+        zip: data.zip,
+        purchaseHistory: [{
+          orderId: uuidv4(),
+          date: new Date().toISOString(),
+          total: totalPrice + shippingCost,
+        }]
+      };
+      // In a real app, this would be an API call. Here we simulate adding to our local "database".
+      const existingCustomer = customers.find(c => c.email === newCustomer.email);
+      if (!existingCustomer) {
+        customers.push(newCustomer);
+        console.log('New customer created:', newCustomer);
+        console.log('Updated customer list:', customers);
+      }
+    }
+
+
     setShowPostOrderActions(true);
     clearCart();
   };
@@ -149,7 +177,7 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Finalizar Compra</h1>
       <div className="grid lg:grid-cols-2 lg:gap-12">
         <div className="lg:order-2">
-            <Card ref={orderSummaryRef}>
+            <Card>
                 <CardHeader>
                     <CardTitle className="font-headline text-xl">Resumen de tu pedido</CardTitle>
                 </CardHeader>
@@ -223,5 +251,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
