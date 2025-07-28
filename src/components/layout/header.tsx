@@ -19,7 +19,7 @@ export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2">
@@ -39,7 +39,8 @@ export default function Header() {
             <span className="sr-only">Buscar</span>
           </Button>
 
-          <Button variant="ghost" size="icon" asChild className="relative">
+          {/* Icons hidden on mobile, will be in FAB */}
+          <Button variant="ghost" size="icon" asChild className="relative hidden md:inline-flex">
             <Link href="/wishlist">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
@@ -49,7 +50,7 @@ export default function Header() {
             </Link>
           </Button>
           
-          <Button variant="ghost" size="icon" asChild className="relative">
+          <Button variant="ghost" size="icon" asChild className="relative hidden md:inline-flex">
             <Link href="/checkout">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
@@ -66,24 +67,10 @@ export default function Header() {
             </Link>
           </Button>
           
-          <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Abrir menú</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="p-4">
-                <nav className="flex flex-col gap-4">
-                  <MainNav vertical onClose={() => setMobileMenuOpen(false)} />
-                   <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
-                      Administración
-                    </Link>
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* This Sheet is kept for the original mobile menu, but the trigger is removed. The new FAB will handle mobile nav. */}
+          <div className="md:hidden">
+            {/* The trigger for the old mobile menu is removed. FAB is now the primary mobile navigation trigger. */}
+          </div>
 
         </div>
       </div>

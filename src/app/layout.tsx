@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import MobileFabMenu from '@/components/layout/mobile-fab-menu';
 
 export const metadata: Metadata = {
   title: 'Mercado Argentino Online',
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <MobileFabMenu />
           </div>
         </Providers>
       </body>
