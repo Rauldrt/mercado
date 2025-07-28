@@ -1,7 +1,8 @@
+"use client";
+
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
 import { ZoomIn } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -46,21 +47,21 @@ export default function ProductView({ product, children }: ProductViewProps) {
                                     </div>
                                 </div>
                             </DialogTrigger>
+                             <DialogContent className="max-w-4xl max-h-[90vh]">
+                                <Image
+                                    src={url}
+                                    alt={product.name}
+                                    width={1200}
+                                    height={1200}
+                                    className="object-contain w-full h-full"
+                                    data-ai-hint="product image zoom"
+                                />
+                            </DialogContent>
                         </CarouselItem>
                         ))}
                     </CarouselContent>
                     <CarouselPrevious className="left-2" />
                     <CarouselNext className="right-2" />
-                    <DialogContent className="max-w-4xl max-h-[90vh]">
-                        <Image
-                            src={product.imageUrls[0]}
-                            alt={product.name}
-                            width={1200}
-                            height={1200}
-                            className="object-contain w-full h-full"
-                            data-ai-hint="product image zoom"
-                        />
-                    </DialogContent>
                     </Carousel>
                 </Dialog>
             </div>
