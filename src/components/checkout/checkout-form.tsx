@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -36,7 +37,7 @@ const formSchema = z.object({
 type ShippingInfo = Omit<z.infer<typeof formSchema>, 'paymentMethod' | 'createAccount'>;
 
 interface CheckoutFormProps {
-    onOrderSuccess: () => void;
+    onOrderSuccess: (data: z.infer<typeof formSchema>) => void;
     isSubmitDisabled?: boolean;
 }
 
@@ -93,10 +94,7 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
       title: "¡Pedido Recibido!",
       description: "Tu compra ha sido procesada exitosamente. Gracias por confiar en nosotros.",
     });
-    // No reseteamos el formulario para que los datos persistan por si el usuario
-    // quiere hacer otra compra o descargar el PDF con sus datos.
-    // form.reset();
-    onOrderSuccess();
+    onOrderSuccess(values);
   }
 
   return (

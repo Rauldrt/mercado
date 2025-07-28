@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from '@/contexts/cart-context';
@@ -15,6 +16,7 @@ import html2canvas from 'html2canvas';
 export default function CheckoutPage() {
   const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState(null);
   const orderSummaryRef = useRef<HTMLDivElement>(null);
 
 
@@ -29,17 +31,14 @@ export default function CheckoutPage() {
     updateQuantity(productId, currentQuantity - 1);
   };
   
-  const handleOrderSuccess = () => {
+  const handleOrderSuccess = (data: any) => {
+    setCustomerInfo(data);
     setShowPostOrderActions(true);
   };
 
   const handleDownloadPdf = () => {
-    const input = orderSummaryRef.current;
+    const input = document.getElementById('pdf-content');
     if (input) {
-      // Temporarily show the PDF-specific elements
-      const pdfHeader = input.querySelector('.pdf-header') as HTMLElement;
-      if (pdfHeader) pdfHeader.style.display = 'block';
-
       html2canvas(input, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -48,11 +47,9 @@ export default function CheckoutPage() {
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('resumen-pedido.pdf');
         
-        // Hide the PDF-specific elements again
-        if (pdfHeader) pdfHeader.style.display = 'none';
-
-        clearCart();
-        setShowPostOrderActions(false);
+        // Opcional: limpiar el carrito y ocultar botones después de la descarga
+        // clearCart();
+        // setShowPostOrderActions(false);
       });
     }
   };
@@ -68,25 +65,88 @@ export default function CheckoutPage() {
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    clearCart();
-    setShowPostOrderActions(false);
   };
 
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Contenido oculto para generar el PDF */}
+      <div id="pdf-content" style={{ position: 'absolute', left: '-9999px', width: '800px', padding: '20px', backgroundColor: 'white', color: 'black' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #EEE', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ height: '40px', width: '40px', marginRight: '12px' }}>
+                    <path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z" />
+                  </svg>
+                  <div>
+                      <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>Mercado Argentino Online</h1>
+                      <p style={{ margin: '0' }}>soporte@mercadoargentino.com.ar</p>
+                  </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                  <h2 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0' }}>Resumen de Pedido</h2>
+                  <p style={{ margin: '0' }}>Pedido #: {(Math.random() * 100000).toFixed(0)}</p>
+                  <p style={{ margin: '0' }}>Fecha: {new Date().toLocaleDateString('es-AR')}</p>
+              </div>
+          </div>
+          {customerInfo && (
+              <div style={{ marginBottom: '30px', borderBottom: '2px solid #EEE', paddingBottom: '20px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>Datos del Cliente:</h3>
+                  <p style={{ margin: '0' }}><strong>Nombre:</strong> {customerInfo.firstName} {customerInfo.lastName}</p>
+                  <p style={{ margin: '0' }}><strong>Dirección:</strong> {customerInfo.address}, {customerInfo.city}, {customerInfo.zip}</p>
+                  <p style={{ margin: '0' }}><strong>Email:</strong> {customerInfo.email}</p>
+              </div>
+          )}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+              <thead style={{ backgroundColor: '#EEE' }}>
+                  <tr>
+                      <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #DDD' }}>Producto</th>
+                      <th style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #DDD' }}>Cantidad</th>
+                      <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #DDD' }}>Precio Unit.</th>
+                      <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #DDD' }}>Subtotal</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {cartItems.map(item => (
+                      <tr key={item.product.id}>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>{item.product.name}</td>
+                          <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #EEE' }}>{item.quantity}</td>
+                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price)}</td>
+                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</td>
+                      </tr>
+                  ))}
+              </tbody>
+          </table>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <div style={{ width: '250px', fontSize: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Subtotal:</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Envío:</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(shippingCost)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', borderTop: '2px solid #EEE', paddingTop: '8px' }}>
+                      <span>Total:</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
+                  </div>
+              </div>
+          </div>
+          <div style={{ marginTop: '40px', textAlign: 'center', fontSize: '12px', color: '#777' }}>
+              <p>Gracias por su compra.</p>
+              <p>Este documento no es una factura válida.</p>
+          </div>
+      </div>
+
+
       <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Finalizar Compra</h1>
       <div className="grid lg:grid-cols-2 lg:gap-12">
         <div className="lg:order-2">
-            <Card ref={orderSummaryRef} className="p-6">
-                <div style={{display: 'none'}} className="pdf-header mb-8">
-                  <h2 className="text-2xl font-bold">Mercado Argentino Online</h2>
-                  <p className="text-sm text-muted-foreground">Fecha: {new Date().toLocaleDateString('es-AR')}</p>
-                </div>
-                <CardHeader className="p-0 mb-4">
+            <Card ref={orderSummaryRef}>
+                <CardHeader>
                     <CardTitle className="font-headline text-xl">Resumen de tu pedido</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 space-y-4">
+                <CardContent className="space-y-4">
                     {cartItems.map(item => (
                         <div key={item.product.id} className="flex items-center gap-4">
                             <div className="relative h-16 w-16 rounded-md overflow-hidden">
@@ -127,7 +187,7 @@ export default function CheckoutPage() {
                     </div>
                      <Separator />
                 </CardContent>
-                <CardFooter className="p-0 pt-4 flex justify-between font-bold text-xl">
+                <CardFooter className="pt-4 flex justify-between font-bold text-xl">
                     <span>Total</span>
                     <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
                 </CardFooter>
