@@ -16,10 +16,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/cart-context';
+import { FileDown, MessageCircle } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Email inválido.' }),
@@ -39,11 +40,20 @@ type ShippingInfo = Omit<z.infer<typeof formSchema>, 'paymentMethod' | 'createAc
 interface CheckoutFormProps {
     onOrderSuccess: (data: z.infer<typeof formSchema>) => void;
     isSubmitDisabled?: boolean;
+    showPostOrderActions: boolean;
+    onDownloadPdf: () => void;
+    onShareWhatsApp: () => void;
 }
 
 const LOCAL_STORAGE_KEY = 'shippingInfo';
 
-export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false }: CheckoutFormProps) {
+export default function CheckoutForm({ 
+    onOrderSuccess, 
+    isSubmitDisabled = false,
+    showPostOrderActions,
+    onDownloadPdf,
+    onShareWhatsApp
+}: CheckoutFormProps) {
     const { toast } = useToast();
     const { cartItems } = useCart();
 
@@ -73,7 +83,7 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
   }, [form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 && !showPostOrderActions) {
         toast({
             title: "Tu carrito está vacío",
             description: "Agrega productos a tu carrito antes de continuar.",
@@ -137,7 +147,8 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                         <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                         <div className="space-y-1 leading-none">
-                            <FormLabel>Crear una cuenta para futuras compras (opcional)</FormLabel>
+                            <FormLabel>Crear una cuenta para futuras compras</FormLabel>
+                             <CardDescription>Guarda tu información para la próxima vez.</CardDescription>
                         </div>
                     </FormItem>
                 )} />
@@ -145,44 +156,68 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
         </Card>
 
         <Card>
-            <CardHeader><CardTitle className="font-headline">Método de Pago</CardTitle></CardHeader>
+            <CardHeader>
+                <CardTitle className="font-headline">Finalizar Compra</CardTitle>
+                <CardDescription>Selecciona tu método de pago y confirma tu pedido.</CardDescription>
+            </CardHeader>
             <CardContent>
-                 <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                        <FormItem className="space-y-3">
-                        <FormControl>
-                            <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col space-y-1"
-                            >
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl><RadioGroupItem value="digital_wallet" /></FormControl>
-                                <FormLabel className="font-normal">Billetera Digital (Mercado Pago, etc.)</FormLabel>
+                <div className="grid md:grid-cols-2 gap-6 items-start">
+                    <FormField
+                        control={form.control}
+                        name="paymentMethod"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel className="font-semibold">Método de Pago</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-2 pt-2"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="digital_wallet" /></FormControl>
+                                        <FormLabel className="font-normal">Billetera Digital</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="credit_card" /></FormControl>
+                                        <FormLabel className="font-normal">Tarjeta de Crédito / Débito</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="cash" /></FormControl>
+                                        <FormLabel className="font-normal">Contado Efectivo</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
                             </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl><RadioGroupItem value="credit_card" /></FormControl>
-                                <FormLabel className="font-normal">Tarjeta de Crédito / Débito</FormLabel>
-                            </FormItem>
-                             <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl><RadioGroupItem value="cash" /></FormControl>
-                                <FormLabel className="font-normal">Contado Efectivo</FormLabel>
-                            </FormItem>
-                            </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                        )}
+                    />
+                    <div className="space-y-4">
+                        {!showPostOrderActions ? (
+                             <Button type="submit" className="w-full" size="lg" disabled={isSubmitDisabled}>
+                                Pagar y Realizar Pedido
+                             </Button>
+                        ) : (
+                            <div className="rounded-md border bg-green-50 border-green-200 p-4 text-center">
+                                <h3 className="font-semibold text-green-800">¡Pedido Confirmado!</h3>
+                                <p className="text-sm text-green-700 mt-1 mb-4">Gracias por tu compra.</p>
+                                <div className="flex justify-center gap-3">
+                                    <Button onClick={onDownloadPdf} size="icon" variant="outline" aria-label="Descargar PDF">
+                                        <FileDown />
+                                    </Button>
+                                    <Button onClick={onShareWhatsApp} size="icon" variant="outline" aria-label="Compartir por WhatsApp">
+                                        <MessageCircle />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </CardContent>
         </Card>
-
-        <Button type="submit" className="w-full" size="lg" disabled={isSubmitDisabled}>
-          {isSubmitDisabled ? 'Pedido Realizado' : 'Pagar y Realizar Pedido'}
-        </Button>
       </form>
     </Form>
   );
 }
+
+    

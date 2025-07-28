@@ -168,7 +168,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="flex-grow space-y-1">
                                 <p className="font-medium">{item.product.name}</p>
-                                {!showPostOrderActions && (
+                                {!showPostOrderActions && cartCount > 0 && (
                                 <div className="flex items-center gap-2">
                                      <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
                                         <Minus className="h-3 w-3" />
@@ -178,6 +178,9 @@ export default function CheckoutPage() {
                                         <Plus className="h-3 w-3" />
                                     </Button>
                                 </div>
+                                )}
+                                {showPostOrderActions && (
+                                    <p className="text-sm text-muted-foreground">Cantidad: {item.quantity}</p>
                                 )}
                             </div>
                             <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
@@ -201,32 +204,24 @@ export default function CheckoutPage() {
                     <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
                 </CardFooter>
             </Card>
-            <p className="text-center text-sm text-muted-foreground mt-4">
-                ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
-            </p>
+             {cartCount > 0 && !showPostOrderActions && (
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                    ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
+                </p>
+            )}
         </div>
         <div className="lg:order-1 mt-8 lg:mt-0">
-          <CheckoutForm onOrderSuccess={handleOrderSuccess} isSubmitDisabled={showPostOrderActions || cartCount === 0} />
-          {showPostOrderActions && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="font-headline">Pedido Confirmado</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                  <p className="text-muted-foreground text-sm">Tu pedido ha sido recibido. ¿Qué te gustaría hacer ahora?</p>
-                  <Button onClick={handleDownloadPdf} size="lg">
-                    <FileDown className="mr-2" />
-                    Descargar Resumen (PDF)
-                  </Button>
-                  <Button onClick={handleShareWhatsApp} variant="secondary" size="lg">
-                    <MessageCircle className="mr-2" />
-                    Compartir por WhatsApp
-                  </Button>
-              </CardContent>
-            </Card>
-          )}
+          <CheckoutForm 
+            onOrderSuccess={handleOrderSuccess} 
+            isSubmitDisabled={showPostOrderActions || cartCount === 0}
+            showPostOrderActions={showPostOrderActions}
+            onDownloadPdf={handleDownloadPdf}
+            onShareWhatsApp={handleShareWhatsApp}
+          />
         </div>
       </div>
     </div>
   );
 }
+
+    
