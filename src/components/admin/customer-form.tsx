@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Customer } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { MapPin } from 'lucide-react';
 
 const formSchema = z.object({
   firstName: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres.' }),
@@ -36,6 +37,7 @@ interface CustomerFormProps {
 }
 
 export default function CustomerForm({ customer, onSave, onCancel }: CustomerFormProps) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,6 +51,37 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
       gpsLocation: customer?.gpsLocation || '',
     },
   });
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          form.setValue('gpsLocation', locationString, { shouldValidate: true });
+          toast({
+            title: 'Ubicación Obtenida',
+            description: 'La ubicación GPS ha sido registrada.',
+          });
+        },
+        (error) => {
+          console.error("Error getting location", error);
+          toast({
+            variant: "destructive",
+            title: 'Error de Ubicación',
+            description: 'No se pudo obtener la ubicación. Por favor, habilita los permisos en tu navegador.',
+          });
+        }
+      );
+    } else {
+       toast({
+        variant: "destructive",
+        title: 'GPS no soportado',
+        description: 'Tu navegador no soporta la geolocalización.',
+      });
+    }
+  };
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const finalCustomer: Customer = {
@@ -150,7 +183,14 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
                 render={({ field }) => (
                 <FormItem>
                     <FormLabel>Ubicación GPS (Opcional)</FormLabel>
-                    <FormControl><Input placeholder="Lat, Long" {...field} /></FormControl>
+                     <div className="flex gap-2">
+                        <FormControl>
+                            <Input placeholder="Lat, Long" {...field} />
+                        </FormControl>
+                        <Button type="button" variant="outline" size="icon" onClick={handleGetLocation} aria-label="Obtener ubicación actual">
+                            <MapPin className="h-4 w-4" />
+                        </Button>
+                    </div>
                     <FormMessage />
                 </FormItem>
                 )}
@@ -165,3 +205,5 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
     </Form>
   );
 }
+
+    

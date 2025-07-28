@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/cart-context';
-import { FileDown, MessageCircle } from 'lucide-react';
+import { FileDown, MessageCircle, MapPin } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Email inválido.' }),
@@ -86,6 +86,36 @@ export default function CheckoutForm({
     }
   }, [form]);
 
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          form.setValue('gpsLocation', locationString, { shouldValidate: true });
+          toast({
+            title: 'Ubicación Obtenida',
+            description: 'Tu ubicación GPS ha sido registrada.',
+          });
+        },
+        (error) => {
+          console.error("Error getting location", error);
+          toast({
+            variant: "destructive",
+            title: 'Error de Ubicación',
+            description: 'No se pudo obtener la ubicación. Por favor, habilita los permisos en tu navegador.',
+          });
+        }
+      );
+    } else {
+       toast({
+        variant: "destructive",
+        title: 'GPS no soportado',
+        description: 'Tu navegador no soporta la geolocalización.',
+      });
+    }
+  };
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (cartItems.length === 0 && !showPostOrderActions) {
         toast({
@@ -147,13 +177,28 @@ export default function CheckoutForm({
                         <FormItem><FormLabel>Código Postal</FormLabel><FormControl><Input placeholder="C1043AAV" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
-                 <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="phoneNumber" render={({ field }) => (
                         <FormItem><FormLabel>Teléfono (Opcional)</FormLabel><FormControl><Input placeholder="+54 9 11..." {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="gpsLocation" render={({ field }) => (
-                        <FormItem><FormLabel>GPS (Opcional)</FormLabel><FormControl><Input placeholder="Lat, Long" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
+                    <FormField
+                        control={form.control}
+                        name="gpsLocation"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>GPS (Opcional)</FormLabel>
+                                <div className="flex gap-2">
+                                <FormControl>
+                                    <Input placeholder="Lat, Long" {...field} />
+                                </FormControl>
+                                <Button type="button" variant="outline" size="icon" onClick={handleGetLocation} aria-label="Obtener ubicación actual">
+                                    <MapPin className="h-4 w-4" />
+                                </Button>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 </div>
                  <FormField control={form.control} name="createAccount" render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
