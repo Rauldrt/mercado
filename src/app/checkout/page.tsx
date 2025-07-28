@@ -6,12 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Plus, Minus } from 'lucide-react';
 
 export default function CheckoutPage() {
-  const { cartItems, totalPrice, cartCount } = useCart();
+  const { cartItems, totalPrice, cartCount, updateQuantity } = useCart();
 
   const shippingCost = 5000;
   const finalTotal = totalPrice + shippingCost;
+  
+  const handleIncreaseQuantity = (productId: string, currentQuantity: number) => {
+    updateQuantity(productId, currentQuantity + 1);
+  };
+  
+  const handleDecreaseQuantity = (productId: string, currentQuantity: number) => {
+    updateQuantity(productId, currentQuantity - 1);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,11 +44,18 @@ export default function CheckoutPage() {
                                     sizes="64px"
                                     data-ai-hint="product thumbnail"
                                 />
-                                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-6 w-6 flex items-center justify-center">{item.quantity}</span>
                             </div>
-                            <div className="flex-grow">
+                            <div className="flex-grow space-y-1">
                                 <p className="font-medium">{item.product.name}</p>
-                                <p className="text-sm text-muted-foreground">{item.quantity} x ${new Intl.NumberFormat('es-AR').format(item.product.price)}</p>
+                                <div className="flex items-center gap-2">
+                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
+                                        <Minus className="h-3 w-3" />
+                                    </Button>
+                                    <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
+                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleIncreaseQuantity(item.product.id, item.quantity)}>
+                                        <Plus className="h-3 w-3" />
+                                    </Button>
+                                </div>
                             </div>
                             <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
                         </div>
@@ -62,7 +79,7 @@ export default function CheckoutPage() {
                 </CardFooter>
             </Card>
             <p className="text-center text-sm text-muted-foreground mt-4">
-                ¿Necesitas cambiar algo? <Link href="/#products" className="underline hover:text-primary">Volver a la tienda</Link>
+                ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
             </p>
         </div>
         <div className="lg:order-1 mt-8 lg:mt-0">
