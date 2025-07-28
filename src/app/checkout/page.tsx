@@ -7,10 +7,16 @@ import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, FileDown, MessageCircle } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function CheckoutPage() {
-  const { cartItems, totalPrice, cartCount, updateQuantity } = useCart();
+  const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
+  const [showPostOrderActions, setShowPostOrderActions] = useState(false);
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
+
 
   const shippingCost = 5000;
   const finalTotal = totalPrice + shippingCost;
@@ -22,13 +28,49 @@ export default function CheckoutPage() {
   const handleDecreaseQuantity = (productId: string, currentQuantity: number) => {
     updateQuantity(productId, currentQuantity - 1);
   };
+  
+  const handleOrderSuccess = () => {
+    setShowPostOrderActions(true);
+  };
+
+  const handleDownloadPdf = () => {
+    const input = orderSummaryRef.current;
+    if (input) {
+      html2canvas(input, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('resumen-pedido.pdf');
+        clearCart();
+        setShowPostOrderActions(false);
+      });
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    let message = '¡Hola! Te comparto el resumen de mi pedido:\n\n';
+    cartItems.forEach(item => {
+      message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
+    });
+    message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(totalPrice)}`;
+    message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
+    message += `\n*Total: $${new Intl.NumberFormat('es-AR').format(finalTotal)}*`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    clearCart();
+    setShowPostOrderActions(false);
+  };
+
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Finalizar Compra</h1>
       <div className="grid lg:grid-cols-2 lg:gap-12">
         <div className="lg:order-2">
-            <Card>
+            <Card ref={orderSummaryRef} className="p-4">
                 <CardHeader>
                     <CardTitle className="font-headline">Resumen de tu pedido</CardTitle>
                 </CardHeader>
@@ -78,12 +120,30 @@ export default function CheckoutPage() {
                     <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
                 </CardFooter>
             </Card>
+            {showPostOrderActions && cartItems.length > 0 && (
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle className="font-headline">Pedido Confirmado</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                   <p className="text-muted-foreground text-sm">Tu pedido ha sido recibido. ¿Qué te gustaría hacer ahora?</p>
+                   <Button onClick={handleDownloadPdf} size="lg">
+                     <FileDown className="mr-2" />
+                     Descargar Resumen (PDF)
+                   </Button>
+                   <Button onClick={handleShareWhatsApp} variant="secondary" size="lg">
+                     <MessageCircle className="mr-2" />
+                     Compartir por WhatsApp
+                   </Button>
+                </CardContent>
+              </Card>
+            )}
             <p className="text-center text-sm text-muted-foreground mt-4">
                 ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
             </p>
         </div>
         <div className="lg:order-1 mt-8 lg:mt-0">
-          <CheckoutForm />
+          <CheckoutForm onOrderSuccess={handleOrderSuccess} isSubmitDisabled={showPostOrderActions} />
         </div>
       </div>
     </div>

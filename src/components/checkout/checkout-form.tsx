@@ -32,9 +32,14 @@ const formSchema = z.object({
   createAccount: z.boolean().default(false).optional(),
 });
 
-export default function CheckoutForm() {
+interface CheckoutFormProps {
+    onOrderSuccess: () => void;
+    isSubmitDisabled?: boolean;
+}
+
+export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false }: CheckoutFormProps) {
     const { toast } = useToast();
-    const { clearCart } = useCart();
+    const { cartItems } = useCart();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,14 +55,22 @@ export default function CheckoutForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (cartItems.length === 0) {
+        toast({
+            title: "Tu carrito está vacío",
+            description: "Agrega productos a tu carrito antes de continuar.",
+            variant: "destructive",
+        });
+        return;
+    }
+    
     console.log('Simulating order submission:', values);
     toast({
       title: "¡Pedido Recibido!",
       description: "Tu compra ha sido procesada exitosamente. Gracias por confiar en nosotros.",
     });
     form.reset();
-    clearCart();
-    // Here you would typically redirect to an order confirmation page
+    onOrderSuccess();
   }
 
   return (
@@ -142,7 +155,9 @@ export default function CheckoutForm() {
             </CardContent>
         </Card>
 
-        <Button type="submit" className="w-full" size="lg">Pagar y Realizar Pedido</Button>
+        <Button type="submit" className="w-full" size="lg" disabled={isSubmitDisabled}>
+          {isSubmitDisabled ? 'Pedido Realizado' : 'Pagar y Realizar Pedido'}
+        </Button>
       </form>
     </Form>
   );
