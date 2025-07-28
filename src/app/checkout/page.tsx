@@ -201,34 +201,32 @@ export default function CheckoutPage() {
                     <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
                 </CardFooter>
             </Card>
-            {showPostOrderActions && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle className="font-headline">Pedido Confirmado</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                   <p className="text-muted-foreground text-sm">Tu pedido ha sido recibido. ¿Qué te gustaría hacer ahora?</p>
-                   <Button onClick={handleDownloadPdf} size="lg">
-                     <FileDown className="mr-2" />
-                     Descargar Resumen (PDF)
-                   </Button>
-                   <Button onClick={handleShareWhatsApp} variant="secondary" size="lg">
-                     <MessageCircle className="mr-2" />
-                     Compartir por WhatsApp
-                   </Button>
-                </CardContent>
-              </Card>
-            )}
             <p className="text-center text-sm text-muted-foreground mt-4">
                 ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
             </p>
         </div>
         <div className="lg:order-1 mt-8 lg:mt-0">
           <CheckoutForm onOrderSuccess={handleOrderSuccess} isSubmitDisabled={showPostOrderActions || cartCount === 0} />
+          {showPostOrderActions && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="font-headline">Pedido Confirmado</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                  <p className="text-muted-foreground text-sm">Tu pedido ha sido recibido. ¿Qué te gustaría hacer ahora?</p>
+                  <Button onClick={handleDownloadPdf} size="lg">
+                    <FileDown className="mr-2" />
+                    Descargar Resumen (PDF)
+                  </Button>
+                  <Button onClick={handleShareWhatsApp} variant="secondary" size="lg">
+                    <MessageCircle className="mr-2" />
+                    Compartir por WhatsApp
+                  </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-    
