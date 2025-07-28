@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import CategoryCarousel from '@/components/products/category-carousel';
+import PromotionsCard from '@/components/products/promotions-card';
 
 
 export default function Home() {
@@ -73,13 +74,21 @@ export default function Home() {
         <p className="text-muted-foreground mt-2">Explora nuestro catálogo completo</p>
       </div>
 
-      <CategoryCarousel 
-        categories={carouselCategories}
-        selectedCategory={selectedCategory}
-        onCategorySelect={handleCategorySelect}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="lg:col-span-1">
+           <CategoryCarousel 
+            categories={carouselCategories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <PromotionsCard />
+        </div>
+      </div>
 
-      <div className="flex justify-between items-center mb-6 mt-12">
+
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold tracking-tight font-headline">
           {selectedCategory === 'all' ? 'Todos los Productos' : selectedCategory}
         </h2>
