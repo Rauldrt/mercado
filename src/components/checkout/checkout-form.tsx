@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,10 +33,14 @@ const formSchema = z.object({
   createAccount: z.boolean().default(false).optional(),
 });
 
+type ShippingInfo = Omit<z.infer<typeof formSchema>, 'paymentMethod' | 'createAccount'>;
+
 interface CheckoutFormProps {
     onOrderSuccess: () => void;
     isSubmitDisabled?: boolean;
 }
+
+const LOCAL_STORAGE_KEY = 'shippingInfo';
 
 export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false }: CheckoutFormProps) {
     const { toast } = useToast();
@@ -54,6 +59,18 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
     },
   });
 
+  useEffect(() => {
+    try {
+        const savedInfo = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedInfo) {
+            const parsedInfo: ShippingInfo = JSON.parse(savedInfo);
+            form.reset({ ...form.getValues(), ...parsedInfo });
+        }
+    } catch (error) {
+        console.error("Failed to load shipping info from localStorage", error);
+    }
+  }, [form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (cartItems.length === 0) {
         toast({
@@ -64,12 +81,21 @@ export default function CheckoutForm({ onOrderSuccess, isSubmitDisabled = false 
         return;
     }
     
+    try {
+        const { paymentMethod, createAccount, ...shippingInfo } = values;
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(shippingInfo));
+    } catch (error) {
+        console.error("Failed to save shipping info to localStorage", error);
+    }
+
     console.log('Simulating order submission:', values);
     toast({
       title: "¡Pedido Recibido!",
       description: "Tu compra ha sido procesada exitosamente. Gracias por confiar en nosotros.",
     });
-    form.reset();
+    // No reseteamos el formulario para que los datos persistan por si el usuario
+    // quiere hacer otra compra o descargar el PDF con sus datos.
+    // form.reset();
     onOrderSuccess();
   }
 
