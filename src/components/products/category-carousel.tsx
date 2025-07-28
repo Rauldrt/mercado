@@ -39,30 +39,42 @@ export default function CategoryCarousel({ categories, selectedCategory, onCateg
 
   return (
      <div>
-        <h3 className="text-lg font-semibold mb-4 font-headline">Categorías</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2">
+        <h3 className="text-lg font-semibold mb-4 text-center font-headline">Explora por Categoría</h3>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
             {categories.map((category) => {
-            const Icon = categoryIcons[category] || categoryIcons.Default;
-            return (
-                <div key={category} className="p-1">
-                <Card 
-                    className={cn(
-                    "cursor-pointer transition-all duration-300 h-full",
-                    selectedCategory === category 
-                        ? "bg-primary text-primary-foreground" 
-                        : "hover:shadow-md hover:-translate-y-1"
-                    )}
-                    onClick={() => onCategorySelect(category)}
-                >
-                    <CardContent className="flex flex-col items-center justify-center p-4 gap-2 text-center">
-                        <Icon className="h-6 w-6" />
-                        <span className="text-sm font-medium">{category}</span>
-                    </CardContent>
-                </Card>
-                </div>
-            )
+              const Icon = categoryIcons[category] || categoryIcons.Default;
+              return (
+                <CarouselItem key={category} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
+                  <div className="p-1">
+                    <Card 
+                      className={cn(
+                        "cursor-pointer transition-all duration-300 h-full",
+                        selectedCategory === category 
+                          ? "bg-primary text-primary-foreground" 
+                          : "hover:shadow-md hover:-translate-y-1"
+                      )}
+                      onClick={() => onCategorySelect(category)}
+                    >
+                      <CardContent className="flex flex-col items-center justify-center p-4 gap-2 text-center">
+                          <Icon className="h-6 w-6" />
+                          <span className="text-sm font-medium">{category}</span>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              )
             })}
-        </div>
+          </CarouselContent>
+          <CarouselPrevious className="ml-12" />
+          <CarouselNext className="mr-12" />
+        </Carousel>
      </div>
   );
 }

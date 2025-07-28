@@ -74,19 +74,17 @@ export default function Home() {
         <p className="text-muted-foreground mt-2">Explora nuestro catálogo completo</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div className="lg:col-span-1">
-           <CategoryCarousel 
-            categories={carouselCategories}
-            selectedCategory={selectedCategory}
-            onCategorySelect={handleCategorySelect}
-          />
-        </div>
-        <div className="lg:col-span-2">
-          <PromotionsCard />
-        </div>
+      <div className="mb-12">
+        <PromotionsCard />
       </div>
 
+      <div className="mb-12">
+        <CategoryCarousel 
+          categories={carouselCategories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleCategorySelect}
+        />
+      </div>
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold tracking-tight font-headline">
