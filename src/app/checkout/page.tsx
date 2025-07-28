@@ -19,9 +19,11 @@ export default function CheckoutPage() {
   const [customerInfo, setCustomerInfo] = useState(null);
   const orderSummaryRef = useRef<HTMLDivElement>(null);
 
+  // State to hold the order details at the moment of purchase
+  const [orderedItems, setOrderedItems] = useState<typeof cartItems>([]);
+  const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
 
   const shippingCost = 5000;
-  const finalTotal = totalPrice + shippingCost;
   
   const handleIncreaseQuantity = (productId: string, currentQuantity: number) => {
     updateQuantity(productId, currentQuantity + 1);
@@ -32,6 +34,8 @@ export default function CheckoutPage() {
   };
   
   const handleOrderSuccess = (data: any) => {
+    setOrderedItems([...cartItems]); // Snapshot the cart items
+    setOrderedTotalPrice(totalPrice); // Snapshot the total price
     setCustomerInfo(data);
     setShowPostOrderActions(true);
     clearCart();
@@ -47,43 +51,28 @@ export default function CheckoutPage() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('resumen-pedido.pdf');
-        
-        // Opcional: limpiar el carrito y ocultar botones después de la descarga
-        // clearCart();
-        // setShowPostOrderActions(false);
       });
     }
   };
 
   const handleShareWhatsApp = () => {
+    const finalTotalForShare = orderedTotalPrice + shippingCost;
     let message = '¡Hola! Te comparto el resumen de mi pedido:\n\n';
-    cartItems.forEach(item => {
+    orderedItems.forEach(item => {
       message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
     });
-    message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(totalPrice)}`;
+    message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
     message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
-    message += `\n*Total: $${new Intl.NumberFormat('es-AR').format(finalTotal)}*`;
+    message += `\n*Total: $${new Intl.NumberFormat('es-AR').format(finalTotalForShare)}*`;
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
-    // Since the cart is cleared on success, we need to handle the case where cartItems is empty
-    // but we still want to show the summary for PDF/WhatsApp. We can use a state to hold the items
-    // at the moment of the order.
-    const [orderedItems, setOrderedItems] = useState([]);
-    const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
-
-    useEffect(() => {
-        if (showPostOrderActions) {
-            setOrderedItems(cartItems);
-            setOrderedTotalPrice(totalPrice);
-        }
-    }, [showPostOrderActions]);
-
-    const itemsToDisplay = showPostOrderActions ? orderedItems : cartItems;
-    const totalToDisplay = showPostOrderActions ? orderedTotalPrice : totalPrice;
-    const finalTotalToDisplay = totalToDisplay + shippingCost;
+  // Determine which data to display based on the checkout state
+  const itemsToDisplay = showPostOrderActions ? orderedItems : cartItems;
+  const totalToDisplay = showPostOrderActions ? orderedTotalPrice : totalPrice;
+  const finalTotalToDisplay = totalToDisplay + shippingCost;
 
 
   return (
@@ -241,3 +230,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
