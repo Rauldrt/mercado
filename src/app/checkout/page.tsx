@@ -36,6 +36,10 @@ export default function CheckoutPage() {
   const handleDownloadPdf = () => {
     const input = orderSummaryRef.current;
     if (input) {
+      // Temporarily show the PDF-specific elements
+      const pdfHeader = input.querySelector('.pdf-header') as HTMLElement;
+      if (pdfHeader) pdfHeader.style.display = 'block';
+
       html2canvas(input, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -43,6 +47,10 @@ export default function CheckoutPage() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('resumen-pedido.pdf');
+        
+        // Hide the PDF-specific elements again
+        if (pdfHeader) pdfHeader.style.display = 'none';
+
         clearCart();
         setShowPostOrderActions(false);
       });
@@ -70,11 +78,15 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Finalizar Compra</h1>
       <div className="grid lg:grid-cols-2 lg:gap-12">
         <div className="lg:order-2">
-            <Card ref={orderSummaryRef} className="p-4">
-                <CardHeader>
-                    <CardTitle className="font-headline">Resumen de tu pedido</CardTitle>
+            <Card ref={orderSummaryRef} className="p-6">
+                <div style={{display: 'none'}} className="pdf-header mb-8">
+                  <h2 className="text-2xl font-bold">Mercado Argentino Online</h2>
+                  <p className="text-sm text-muted-foreground">Fecha: {new Date().toLocaleDateString('es-AR')}</p>
+                </div>
+                <CardHeader className="p-0 mb-4">
+                    <CardTitle className="font-headline text-xl">Resumen de tu pedido</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-0 space-y-4">
                     {cartItems.map(item => (
                         <div key={item.product.id} className="flex items-center gap-4">
                             <div className="relative h-16 w-16 rounded-md overflow-hidden">
@@ -115,7 +127,7 @@ export default function CheckoutPage() {
                     </div>
                      <Separator />
                 </CardContent>
-                <CardFooter className="flex justify-between font-bold text-xl">
+                <CardFooter className="p-0 pt-4 flex justify-between font-bold text-xl">
                     <span>Total</span>
                     <span>${new Intl.NumberFormat('es-AR').format(finalTotal)}</span>
                 </CardFooter>
