@@ -59,9 +59,11 @@ export default function Header() {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <User className="h-5 w-5" />
-            <span className="sr-only">Perfil de usuario</span>
+          <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+            <Link href="/admin">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Perfil de usuario</span>
+            </Link>
           </Button>
           
           <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -75,6 +77,9 @@ export default function Header() {
               <div className="p-4">
                 <nav className="flex flex-col gap-4">
                   <MainNav vertical onClose={() => setMobileMenuOpen(false)} />
+                   <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
+                      Administración
+                    </Link>
                 </nav>
               </div>
             </SheetContent>
