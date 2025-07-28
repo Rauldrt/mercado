@@ -39,7 +39,7 @@ export default function Header() {
             <span className="sr-only">Buscar</span>
           </Button>
 
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild className="relative">
             <Link href="/wishlist">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
@@ -49,7 +49,7 @@ export default function Header() {
             </Link>
           </Button>
           
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild className="relative">
             <Link href="/checkout">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
