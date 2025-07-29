@@ -45,12 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state update
+      // After successful sign-in, onAuthStateChanged will fire.
+      // We can also force a redirect here to ensure navigation.
+      router.push('/admin');
     } catch (error) {
       console.error("Error during sign-in:", error);
       setLoading(false); // Ensure loading is turned off on error
     }
-  }, []);
+  }, [router]);
 
   const logout = useCallback(async () => {
     try {
@@ -61,6 +63,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router]);
 
+  const value = {
+    user,
+    loading,
+    signIn,
+    logout
+  };
+  
   if (loading) {
      return (
       <div className="flex justify-center items-center h-screen">
@@ -69,12 +78,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  const value = {
-    user,
-    loading,
-    signIn,
-    logout
-  };
-  
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
