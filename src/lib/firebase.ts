@@ -2,7 +2,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import type { Product, Promotion } from './types';
+import type { Product, Promotion, Customer } from './types';
 
 const firebaseConfig = {
   projectId: "mercado-argentino-online",
@@ -21,48 +21,28 @@ const auth = getAuth(app);
 
 const productsCollection = collection(db, 'products');
 const promotionsCollection = collection(db, 'promotions');
+const customersCollection = collection(db, 'customers');
 
-// Helper to convert Firestore doc to Product
-const productFromFirestore = (doc: any): Product => {
+// Helper to convert Firestore doc to a given type
+const docToType = <T>(doc: any): T => {
     const data = doc.data();
     return {
         id: doc.id,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        imageUrls: data.imageUrls,
-        category: data.category,
-        specifications: data.specifications,
-        stock: data.stock,
-        vendor: data.vendor,
-        vendorId: data.vendorId,
-    };
-}
-
-// Helper to convert Firestore doc to Promotion
-const promotionFromFirestore = (doc: any): Promotion => {
-    const data = doc.data();
-    return {
-        id: doc.id,
-        title: data.title,
-        description: data.description,
-        imageUrl: data.imageUrl,
-        imageHint: data.imageHint,
-        link: data.link,
+        ...data,
     };
 }
 
 // Product Operations
 export const getProducts = async (): Promise<Product[]> => {
     const snapshot = await getDocs(productsCollection);
-    return snapshot.docs.map(productFromFirestore);
+    return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
     const docRef = doc(db, 'products', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-        return productFromFirestore(docSnap);
+        return docToType<Product>(docSnap);
     }
     return undefined;
 }
@@ -70,21 +50,21 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 export const getProductsByVendor = async (vendorName: string): Promise<Product[]> => {
     const q = query(productsCollection, where("vendor", "==", vendorName));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(productFromFirestore);
+    return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
 export const getProductsByVendorId = async (vendorId: string): Promise<Product[]> => {
     const q = query(productsCollection, where("vendorId", "==", vendorId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(productFromFirestore);
+    return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
-export const addProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
+export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> => {
     const docRef = await addDoc(productsCollection, product);
-    return { id: docRef.id, ...product };
+    return docRef.id;
 }
 
-export const updateProduct = async (id: string, productUpdate: Partial<Product>): Promise<void> => {
+export const updateProduct = async (id: string, productUpdate: Partial<Omit<Product, 'id'>>): Promise<void> => {
     const docRef = doc(db, 'products', id);
     await updateDoc(docRef, productUpdate);
 }
@@ -97,21 +77,54 @@ export const deleteProduct = async (id: string): Promise<void> => {
 // Promotion Operations
 export const getPromotions = async (): Promise<Promotion[]> => {
     const snapshot = await getDocs(promotionsCollection);
-    return snapshot.docs.map(promotionFromFirestore);
+    return snapshot.docs.map(doc => docToType<Promotion>(doc));
 }
 
-export const addPromotion = async (promotion: Omit<Promotion, 'id'>): Promise<Promotion> => {
+export const addPromotion = async (promotion: Omit<Promotion, 'id'>): Promise<string> => {
     const docRef = await addDoc(promotionsCollection, promotion);
-    return { id: docRef.id, ...promotion };
+    return docRef.id;
 }
 
-export const updatePromotion = async (id: string, promotionUpdate: Partial<Promotion>): Promise<void> => {
+export const updatePromotion = async (id: string, promotionUpdate: Partial<Omit<Promotion, 'id'>>): Promise<void> => {
     const docRef = doc(db, 'promotions', id);
     await updateDoc(docRef, promotionUpdate);
 }
 
 export const deletePromotion = async (id: string): Promise<void> => {
     const docRef = doc(db, 'promotions', id);
+    await deleteDoc(docRef);
+}
+
+// Customer Operations
+export const getCustomers = async (): Promise<Customer[]> => {
+    const snapshot = await getDocs(customersCollection);
+    return snapshot.docs.map(doc => docToType<Customer>(doc));
+}
+
+export const addCustomer = async (customer: Omit<Customer, 'id'>): Promise<string> => {
+    // Check if customer already exists by email
+    const q = query(customersCollection, where("email", "==", customer.email));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+        // Customer exists, let's update their purchase history
+        const existingCustomerDoc = snapshot.docs[0];
+        const existingCustomerData = docToType<Customer>(existingCustomerDoc);
+        const updatedHistory = [...existingCustomerData.purchaseHistory, ...customer.purchaseHistory];
+        await updateDoc(existingCustomerDoc.ref, { purchaseHistory: updatedHistory });
+        return existingCustomerDoc.id;
+    }
+    // New customer, add them
+    const docRef = await addDoc(customersCollection, customer);
+    return docRef.id;
+}
+
+export const updateCustomer = async (id: string, customerUpdate: Partial<Omit<Customer, 'id'>>): Promise<void> => {
+    const docRef = doc(db, 'customers', id);
+    await updateDoc(docRef, customerUpdate);
+}
+
+export const deleteCustomer = async (id: string): Promise<void> => {
+    const docRef = doc(db, 'customers', id);
     await deleteDoc(docRef);
 }
 

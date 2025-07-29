@@ -9,10 +9,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { customers } from '@/lib/customers'; // Simulating customer database
+import { addCustomer } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import type { Customer } from '@/lib/types';
 import type { z } from 'zod';
@@ -37,14 +37,13 @@ export default function CheckoutPage() {
     updateQuantity(productId, currentQuantity - 1);
   };
   
-  const handleOrderSuccess = (data: z.infer<typeof checkoutFormSchema>) => {
+  const handleOrderSuccess = async (data: z.infer<typeof checkoutFormSchema>) => {
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
     setCustomerInfo(data);
 
     if (data.createAccount) {
-      const newCustomer: Customer = {
-        id: uuidv4(),
+      const newCustomer: Omit<Customer, 'id'> = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -59,12 +58,13 @@ export default function CheckoutPage() {
           total: totalPrice + shippingCost,
         }]
       };
-      // In a real app, this would be an API call. Here we simulate adding to our local "database".
-      const existingCustomer = customers.find(c => c.email === newCustomer.email);
-      if (!existingCustomer) {
-        customers.push(newCustomer);
-        console.log('New customer created:', newCustomer);
-        console.log('Updated customer list:', customers);
+      
+      try {
+        const customerId = await addCustomer(newCustomer);
+        console.log(`Customer saved with ID: ${customerId}`);
+      } catch (error) {
+        console.error("Failed to save customer:", error);
+        // Optionally, show a toast to the user that saving their info failed.
       }
     }
 

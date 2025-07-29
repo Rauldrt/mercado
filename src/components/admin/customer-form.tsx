@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Customer } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +31,7 @@ const formSchema = z.object({
 
 interface CustomerFormProps {
   customer?: Customer | null;
-  onSave: (customer: Customer) => void;
+  onSave: (customer: Omit<Customer, 'id' | 'purchaseHistory'> & { id?: string }) => void;
   onCancel: () => void;
 }
 
@@ -84,10 +83,9 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const finalCustomer: Customer = {
-      id: customer?.id || uuidv4(),
+    const finalCustomer: Omit<Customer, 'purchaseHistory'> & { id?: string } = {
+      id: customer?.id,
       ...values,
-      purchaseHistory: customer?.purchaseHistory || [],
     };
     onSave(finalCustomer);
   }
@@ -205,5 +203,3 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
     </Form>
   );
 }
-
-    

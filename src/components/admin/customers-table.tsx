@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
-import { customers as initialCustomers } from "@/lib/customers";
+import { useState, useEffect, useCallback } from "react";
 import type { Customer } from "@/lib/types";
+import { getCustomers, addCustomer, updateCustomer, deleteCustomer } from "@/lib/firebase";
 import {
   Table,
   TableBody,
@@ -30,16 +30,34 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import CustomerForm from "./customer-form";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminCustomersTable() {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
+
+  const fetchCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const fetchedCustomers = await getCustomers();
+      setCustomers(fetchedCustomers);
+    } catch (error) {
+      console.error("Failed to fetch customers:", error);
+      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los clientes." });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handleOpenForm = (customer: Customer | null) => {
     setSelectedCustomer(customer);
@@ -51,30 +69,52 @@ export default function AdminCustomersTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handleCustomerSave = (customerData: Customer) => {
-    if (selectedCustomer) {
-      // Edit
-      setCustomers(prev =>
-        prev.map(c => (c.id === customerData.id ? customerData : c))
-      );
-      toast({ title: "Cliente Actualizado", description: `Los datos de "${customerData.firstName} ${customerData.lastName}" se han actualizado.` });
-    } else {
-      // Add
-      setCustomers(prev => [...prev, customerData]);
-      toast({ title: "Cliente Creado", description: `"${customerData.firstName} ${customerData.lastName}" se ha añadido a tu lista de clientes.` });
+  const handleCustomerSave = async (customerData: Omit<Customer, 'id'> & { id?: string }) => {
+    try {
+      if (customerData.id) {
+        // Edit
+        const { id, ...dataToUpdate } = customerData;
+        await updateCustomer(id, dataToUpdate);
+        toast({ title: "Cliente Actualizado", description: `Los datos de "${dataToUpdate.firstName} ${dataToUpdate.lastName}" se han actualizado.` });
+      } else {
+        // Add
+        const { id, ...dataToAdd } = customerData;
+        await addCustomer(dataToAdd as Omit<Customer, 'id'>);
+        toast({ title: "Cliente Creado", description: `"${customerData.firstName} ${customerData.lastName}" se ha añadido a tu lista de clientes.` });
+      }
+      await fetchCustomers(); // Refresh list
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el cliente." });
+      console.error("Failed to save customer:", error);
+    } finally {
+      setFormOpen(false);
+      setSelectedCustomer(null);
     }
-    setFormOpen(false);
-    setSelectedCustomer(null);
   };
 
-  const handleDeleteCustomer = () => {
+  const handleDeleteCustomer = async () => {
     if (selectedCustomer) {
-      setCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
-      toast({ title: "Cliente Eliminado", description: `"${selectedCustomer.firstName} ${selectedCustomer.lastName}" se ha eliminado.` });
+      try {
+        await deleteCustomer(selectedCustomer.id);
+        toast({ title: "Cliente Eliminado", description: `"${selectedCustomer.firstName} ${selectedCustomer.lastName}" se ha eliminado.` });
+        await fetchCustomers(); // Refresh list
+      } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el cliente." });
+        console.error("Failed to delete customer:", error);
+      } finally {
+        setDeleteAlertOpen(false);
+        setSelectedCustomer(null);
+      }
     }
-    setDeleteAlertOpen(false);
-    setSelectedCustomer(null);
   };
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div>
