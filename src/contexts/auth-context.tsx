@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Error during sign-in:", error);
     } finally {
-      setLoading(false);
+      // No establecemos loading a false aquí porque onAuthStateChanged se encargará de ello
     }
   }, [router]);
 
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Error during sign-out:", error);
     } finally {
-      setLoading(false);
+      // onAuthStateChanged se activará y establecerá el usuario a null y loading a false
     }
   }, [router]);
 
