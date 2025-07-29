@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, Search, User, PanelTop } from 'lucide-react';
+import { ShoppingCart, Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
@@ -51,13 +51,6 @@ export default function Header() {
               )}
               <span className="sr-only">Carrito de compras</span>
             </Link>
-          </Button>
-          
-          <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
-              <Link href="/admin">
-                  <PanelTop className="mr-2 h-4 w-4" />
-                  Admin
-              </Link>
           </Button>
           
           <div className="md:hidden">

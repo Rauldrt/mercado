@@ -3,12 +3,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, ShoppingBag, Heart, ShoppingCart, PanelTop, Plus, X } from 'lucide-react';
+import { Home, ShoppingBag, Heart, ShoppingCart, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
-import { cn } from '@/lib/utils';
 
 export default function MobileFabMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +19,6 @@ export default function MobileFabMenu() {
     { href: '/#products', label: 'Productos', icon: ShoppingBag },
     { href: '/wishlist', label: 'Deseos', icon: Heart, badge: 'wishlist' },
     { href: '/checkout', label: 'Carrito', icon: ShoppingCart, badge: 'cart' },
-    { href: '/admin', label: 'Admin', icon: PanelTop },
   ];
 
   const getBadgeCount = (badge?: string) => {
