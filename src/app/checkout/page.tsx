@@ -15,17 +15,19 @@ import html2canvas from 'html2canvas';
 import { customers } from '@/lib/customers'; // Simulating customer database
 import { v4 as uuidv4 } from 'uuid';
 import type { Customer } from '@/lib/types';
+import type { z } from 'zod';
+import type { checkoutFormSchema } from '@/components/checkout/checkout-form';
 
 export default function CheckoutPage() {
   const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState(null);
+  const [customerInfo, setCustomerInfo] = useState<z.infer<typeof checkoutFormSchema> | null>(null);
   
   // State to hold the order details at the moment of purchase
   const [orderedItems, setOrderedItems] = useState<typeof cartItems>([]);
   const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
 
-  const shippingCost = 5000;
+  const shippingCost = 0; // Removed shipping cost as requested
   
   const handleIncreaseQuantity = (productId: string, currentQuantity: number) => {
     updateQuantity(productId, currentQuantity + 1);
@@ -35,7 +37,7 @@ export default function CheckoutPage() {
     updateQuantity(productId, currentQuantity - 1);
   };
   
-  const handleOrderSuccess = (data: any) => {
+  const handleOrderSuccess = (data: z.infer<typeof checkoutFormSchema>) => {
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
     setCustomerInfo(data);
@@ -86,14 +88,31 @@ export default function CheckoutPage() {
   };
 
   const handleShareWhatsApp = () => {
+    if (!customerInfo) return;
+
     const finalTotalForShare = orderedTotalPrice + shippingCost;
     let message = '¡Hola! Te comparto el resumen de mi pedido:\n\n';
     orderedItems.forEach(item => {
       message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
     });
     message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
-    message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
+    
+    // Only add shipping if it's greater than 0
+    if (shippingCost > 0) {
+        message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
+    }
+    
     message += `\n*Total: $${new Intl.NumberFormat('es-AR').format(finalTotalForShare)}*`;
+    
+    message += `\n\n*Datos de Envío:*`;
+    message += `\nNombre: ${customerInfo.firstName} ${customerInfo.lastName}`;
+    message += `\nDirección: ${customerInfo.address}, ${customerInfo.city}`;
+
+    if (customerInfo.gpsLocation) {
+        const [lat, lng] = customerInfo.gpsLocation.split(',').map(s => s.trim());
+        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        message += `\nUbicación: ${mapsLink}`;
+    }
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -159,10 +178,12 @@ export default function CheckoutPage() {
                       <span>Subtotal:</span>
                       <span>${new Intl.NumberFormat('es-AR').format(totalToDisplay)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span>Envío:</span>
-                      <span>${new Intl.NumberFormat('es-AR').format(shippingCost)}</span>
-                  </div>
+                  {shippingCost > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span>Envío:</span>
+                        <span>${new Intl.NumberFormat('es-AR').format(shippingCost)}</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', borderTop: '2px solid #EEE', paddingTop: '8px' }}>
                       <span>Total:</span>
                       <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
@@ -222,10 +243,12 @@ export default function CheckoutPage() {
                             <span>Subtotal</span>
                             <span>${new Intl.NumberFormat('es-AR').format(totalToDisplay)}</span>
                        </div>
-                        <div className="flex justify-between">
-                            <span>Envío (estimado)</span>
-                            <span>${new Intl.NumberFormat('es-AR').format(shippingCost)}</span>
-                       </div>
+                        {shippingCost > 0 && (
+                           <div className="flex justify-between">
+                                <span>Envío (estimado)</span>
+                                <span>${new Intl.NumberFormat('es-AR').format(shippingCost)}</span>
+                           </div>
+                        )}
                     </div>
                      <Separator />
                 </CardContent>
@@ -253,3 +276,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

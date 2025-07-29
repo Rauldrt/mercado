@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/cart-context';
 import { FileDown, MessageCircle, MapPin } from 'lucide-react';
 
-const formSchema = z.object({
+export const checkoutFormSchema = z.object({
   email: z.string().email({ message: 'Email inválido.' }),
   firstName: z.string().min(2, { message: 'Nombre muy corto.' }),
   lastName: z.string().min(2, { message: 'Apellido muy corto.' }),
@@ -37,10 +37,10 @@ const formSchema = z.object({
   createAccount: z.boolean().default(false).optional(),
 });
 
-type ShippingInfo = Omit<z.infer<typeof formSchema>, 'paymentMethod' | 'createAccount'>;
+type ShippingInfo = Omit<z.infer<typeof checkoutFormSchema>, 'paymentMethod' | 'createAccount'>;
 
 interface CheckoutFormProps {
-    onOrderSuccess: (data: z.infer<typeof formSchema>) => void;
+    onOrderSuccess: (data: z.infer<typeof checkoutFormSchema>) => void;
     isSubmitDisabled?: boolean;
     showPostOrderActions: boolean;
     onDownloadPdf: () => void;
@@ -59,8 +59,8 @@ export default function CheckoutForm({
     const { toast } = useToast();
     const { cartItems } = useCart();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof checkoutFormSchema>>({
+    resolver: zodResolver(checkoutFormSchema),
     defaultValues: {
       email: '',
       firstName: '',
@@ -116,7 +116,7 @@ export default function CheckoutForm({
     }
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof checkoutFormSchema>) {
     if (cartItems.length === 0 && !showPostOrderActions) {
         toast({
             title: "Tu carrito está vacío",
@@ -216,7 +216,7 @@ export default function CheckoutForm({
             <CardHeader>
                 <CardTitle className="font-headline">Finalizar Compra</CardTitle>
                 <CardDescription>Selecciona tu método de pago y confirma tu pedido.</CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent>
                 <div className="grid md:grid-cols-2 gap-6 items-start">
                     <FormField
@@ -276,5 +276,3 @@ export default function CheckoutForm({
     </Form>
   );
 }
-
-    
