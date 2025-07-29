@@ -9,6 +9,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "../ui/button"
@@ -17,6 +18,7 @@ import Link from "next/link"
 import { getPromotions } from "@/lib/firebase"
 import type { Promotion } from "@/lib/types"
 import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export default function PromotionsCard() {
   const plugin = React.useRef(
@@ -24,6 +26,8 @@ export default function PromotionsCard() {
   )
   const [promotions, setPromotions] = React.useState<Promotion[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(0)
 
   React.useEffect(() => {
     const fetchPromotions = async () => {
@@ -35,6 +39,16 @@ export default function PromotionsCard() {
     fetchPromotions();
   }, []);
 
+  React.useEffect(() => {
+    if (!api) {
+      return
+    }
+    setCurrent(api.selectedScrollSnap() + 1)
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
   if (loading) {
     return <Skeleton className="w-full h-[250px] md:h-[400px]" />;
   }
@@ -45,6 +59,7 @@ export default function PromotionsCard() {
 
   return (
     <Carousel
+      setApi={setApi}
       plugins={[plugin.current]}
       className="w-full h-full"
       onMouseEnter={plugin.current.stop}
@@ -60,17 +75,32 @@ export default function PromotionsCard() {
                     src={promo.imageUrl} 
                     alt={promo.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                     data-ai-hint={promo.imageHint}
                     priority={index === 0} // Prioritize loading the first image
                   />
                   <div className="absolute inset-0 bg-black/50" />
                   <div className="relative z-10 text-white text-center p-6 flex flex-col items-center">
-                    <h3 className="text-2xl md:text-3xl font-bold font-headline">{promo.title}</h3>
-                    <p className="mt-2 mb-4 max-w-md">{promo.description}</p>
-                    <Button asChild>
-                      <Link href={`/product/${promo.productId}`}>Ver Oferta</Link>
-                    </Button>
+                    <h3 className={cn(
+                        "text-2xl md:text-3xl font-bold font-headline transition-all duration-700 ease-out",
+                        current === index + 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                      )}>
+                        {promo.title}
+                    </h3>
+                    <p className={cn(
+                        "mt-2 mb-4 max-w-md transition-all duration-700 ease-out delay-200",
+                        current === index + 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                      )}>
+                        {promo.description}
+                    </p>
+                    <div className={cn(
+                        "transition-all duration-700 ease-out delay-300",
+                         current === index + 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    )}>
+                        <Button asChild>
+                          <Link href={`/product/${promo.productId}`}>Ver Oferta</Link>
+                        </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
