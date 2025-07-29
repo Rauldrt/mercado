@@ -1,4 +1,6 @@
 
+"use client";
+
 import * as React from "react"
 import Autoplay from "embla-carousel-autoplay"
 import {
@@ -14,13 +16,28 @@ import Image from "next/image"
 import Link from "next/link"
 import { getPromotions } from "@/lib/firebase"
 import type { Promotion } from "@/lib/types"
+import { Skeleton } from "../ui/skeleton";
 
-export default async function PromotionsCard() {
+export default function PromotionsCard() {
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   )
-  
-  const promotions = await getPromotions();
+  const [promotions, setPromotions] = React.useState<Promotion[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchPromotions = async () => {
+      setLoading(true);
+      const fetchedPromotions = await getPromotions();
+      setPromotions(fetchedPromotions);
+      setLoading(false);
+    }
+    fetchPromotions();
+  }, []);
+
+  if (loading) {
+    return <Skeleton className="w-full h-[250px] md:h-[400px]" />;
+  }
 
   if (promotions.length === 0) {
     return null; // Don't render anything if there are no promotions
@@ -28,16 +45,10 @@ export default async function PromotionsCard() {
 
   return (
     <Carousel
-      // The plugin is now passed correctly for server components
-      plugins={[
-        Autoplay({
-          delay: 5000,
-          stopOnInteraction: true,
-        }),
-      ]}
+      plugins={[plugin.current]}
       className="w-full h-full"
-      // onMouseEnter and onMouseLeave are client-side events and cannot be used here
-      // Autoplay plugin handles stopOnInteraction by default.
+      onMouseEnter={plugin.current.stop}
+      onMouseLeave={plugin.current.reset}
     >
       <CarouselContent className="h-full">
         {promotions.map((promo, index) => (
@@ -72,4 +83,3 @@ export default async function PromotionsCard() {
     </Carousel>
   )
 }
-
