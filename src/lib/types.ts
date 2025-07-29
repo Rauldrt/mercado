@@ -7,6 +7,7 @@ export type Product = {
   category: string;
   specifications: Record<string, string>;
   stock: number;
+  vendor: string;
 };
 
 export type CartItem = {

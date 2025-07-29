@@ -10,6 +10,7 @@ export const products: Product[] = [
     category: 'Calzado',
     specifications: { material: 'Cuero Sintético', suela: 'Goma Antideslizante', color: 'Negro' },
     stock: 50,
+    vendor: 'Urbano Zapas',
   },
   {
     id: '2',
@@ -20,6 +21,7 @@ export const products: Product[] = [
     category: 'Hogar',
     specifications: { material: 'Calabaza y Cuero', virola: 'Acero Inoxidable', origen: 'Uruguay' },
     stock: 30,
+    vendor: 'El Rincón del Matero',
   },
   {
     id: '3',
@@ -30,6 +32,7 @@ export const products: Product[] = [
     category: 'Electrónica',
     specifications: { conectividad: 'Bluetooth 5.2', autonomía: '20 horas', cancelación_ruido: 'Activa' },
     stock: 25,
+    vendor: 'TecnoStore',
   },
   {
     id: '4',
@@ -40,6 +43,7 @@ export const products: Product[] = [
     category: 'Indumentaria',
     specifications: { material: 'Denim 14oz', corte: 'Regular Fit', color: 'Azul Oscuro' },
     stock: 40,
+    vendor: 'Ropa al Paso',
   },
   {
     id: '5',
@@ -50,6 +54,7 @@ export const products: Product[] = [
     category: 'Deportes',
     specifications: { capacidad: '60 Litros', material: 'Nylon Ripstop', impermeable: 'Sí' },
     stock: 15,
+    vendor: 'Aventura Extrema',
   },
   {
     id: '6',
@@ -60,6 +65,7 @@ export const products: Product[] = [
     category: 'Hogar',
     specifications: { tipo_luz: 'LED Cálida', potencia: '8W', material: 'Aluminio' },
     stock: 60,
+    vendor: 'El Rincón del Matero',
   },
     {
     id: '7',
@@ -70,6 +76,7 @@ export const products: Product[] = [
     category: 'Deportes',
     specifications: { material: 'Cuero Vacuno', suela: 'FG (Firm Ground)', color: 'Blanco y Celeste' },
     stock: 22,
+    vendor: 'Aventura Extrema',
   },
   {
     id: '8',
@@ -80,6 +87,7 @@ export const products: Product[] = [
     category: 'Electrónica',
     specifications: { resolucion: '4K UHD (3840x2160)', tamano: '55 pulgadas', sistema: 'Android TV' },
     stock: 10,
+    vendor: 'TecnoStore',
   },
 ];
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -34,7 +33,8 @@ export default function Home() {
       const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
       const matchesSearch = 
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.vendor.toLowerCase().includes(searchQuery.toLowerCase());
       
       return matchesCategory && matchesPrice && matchesSearch;
     });
@@ -70,8 +70,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Nuestros Productos</h1>
-        <p className="text-muted-foreground mt-2">Explora nuestro catálogo completo</p>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Vidriera Local</h1>
+        <p className="text-muted-foreground mt-2">Explora los productos y servicios de tu comunidad</p>
       </div>
 
       <div className="mb-12">

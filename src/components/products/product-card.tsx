@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
@@ -76,7 +76,8 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
       <CardContent className="p-4 flex-grow">
         <Link href={`/product/${product.id}`} className="block">
-          <CardTitle className="text-lg font-medium leading-tight mb-2 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
+          <CardTitle className="text-lg font-medium leading-tight mb-1 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground mb-2">{product.vendor}</CardDescription>
           <p className="text-2xl font-bold text-foreground">
             ${new Intl.NumberFormat('es-AR').format(product.price)}
           </p>

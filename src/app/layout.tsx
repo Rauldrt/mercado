@@ -6,8 +6,8 @@ import Footer from '@/components/layout/footer';
 import MobileFabMenu from '@/components/layout/mobile-fab-menu';
 
 export const metadata: Metadata = {
-  title: 'Mercado Argentino Online',
-  description: 'Catálogo online robusto y escalable para el mercado argentino.',
+  title: 'Vidriera Local',
+  description: 'Un catálogo digital para potenciar el comercio local.',
 };
 
 export default function RootLayout({
