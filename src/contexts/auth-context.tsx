@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithRedirect, getRedirectResult, GoogleAuthProvider, User, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
@@ -31,28 +31,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
     });
 
-    // Cleanup subscription on unmount
+    // Check for redirect result
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+          router.push('/admin');
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting redirect result:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+    
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signIn = useCallback(async () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      // After successful sign-in, onAuthStateChanged will fire.
-      // We can also force a redirect here to ensure navigation.
-      router.push('/admin');
-    } catch (error) {
-      console.error("Error during sign-in:", error);
-      setLoading(false); // Ensure loading is turned off on error
-    }
-  }, [router]);
+    await signInWithRedirect(auth, provider);
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -70,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout
   };
   
+  // Render a global loader while auth state is being determined
   if (loading) {
      return (
       <div className="flex justify-center items-center h-screen">

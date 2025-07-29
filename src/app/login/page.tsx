@@ -18,10 +18,13 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
   
+  // Muestra un loader si el usuario ya existe (y está a punto de ser redirigido)
+  // o si el proceso de autenticación general está en curso.
   if (loading || user) {
     return (
         <div className="flex min-h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="ml-4 text-muted-foreground">Procesando inicio de sesión...</p>
         </div>
     )
   }
@@ -38,7 +41,7 @@ export default function LoginPage() {
             variant="default"
             className="w-full"
             onClick={signIn}
-            disabled={loading}
+            disabled={loading} // El botón se desactiva mientras carga
           >
             {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
