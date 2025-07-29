@@ -3,8 +3,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User, signOut as firebaseSignOut, getAuth } from 'firebase/auth';
+import { app } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 
@@ -16,6 +16,9 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Initialize Firebase Auth
+const auth = getAuth(app);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

@@ -1,7 +1,6 @@
 
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import type { Product, Promotion, Customer } from './types';
 
 const firebaseConfig = {
@@ -17,7 +16,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 const productsCollection = collection(db, 'products');
 const promotionsCollection = collection(db, 'promotions');
@@ -129,4 +127,4 @@ export const deleteCustomer = async (id: string): Promise<void> => {
 }
 
 
-export { app, db, auth };
+export { app };
