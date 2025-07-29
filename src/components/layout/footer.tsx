@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4 font-headline">Vidriera Local</h3>
+            <h3 className="font-bold text-lg mb-4 font-headline">Ndera-Store</h3>
             <p className="text-sm">Potenciando el comercio de nuestra comunidad.</p>
           </div>
           <div>
@@ -27,12 +27,12 @@ export default function Footer() {
           </div>
           <div>
             <h4 className="font-semibold mb-4 font-headline">Contacto</h4>
-            <p className="text-sm">Email: contacto@vidrieralocal.com.ar</p>
+            <p className="text-sm">Email: contacto@ndera.store</p>
             <p className="text-sm">Teléfono: +54 9 11 1234-5678</p>
           </div>
         </div>
         <div className="border-t border-border mt-8 pt-6 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Vidriera Local. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Ndera-Store. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

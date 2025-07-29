@@ -6,8 +6,8 @@ import Footer from '@/components/layout/footer';
 import MobileFabMenu from '@/components/layout/mobile-fab-menu';
 
 export const metadata: Metadata = {
-  title: 'Vidriera Local',
-  description: 'Un catálogo digital para potenciar el comercio local.',
+  title: 'Ndera-Store',
+  description: 'Tu vidriera digital para potenciar el comercio local.',
 };
 
 export default function RootLayout({

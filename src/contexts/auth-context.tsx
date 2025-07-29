@@ -32,12 +32,12 @@ export const useAuth = () => {
 // Mock user data
 const mockUser: MockUser = {
   uid: 'admin-user-01',
-  email: 'admin@vidrieralocal.com',
-  displayName: 'Admin Local',
+  email: 'admin@ndera.store',
+  displayName: 'Admin Ndera',
   photoURL: 'https://placehold.co/100x100.png'
 };
 
-const AUTH_STORAGE_KEY = 'vidriera_local_auth';
+const AUTH_STORAGE_KEY = 'ndera_store_auth';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<MockUser | null>(null);
