@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
   product: Product;
@@ -64,6 +65,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.id}`} className="block">
         <CardHeader className="p-0">
           <div className="aspect-square relative">
+            {product.promotionTag && (
+              <Badge 
+                variant="destructive" 
+                className="absolute top-2 right-2 z-10"
+              >
+                {product.promotionTag}
+              </Badge>
+            )}
             <Image
               src={product.imageUrls[0]}
               alt={product.name}

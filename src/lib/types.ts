@@ -10,6 +10,7 @@ export type Product = {
   stock: number;
   vendor: string;
   vendorId: string; // Add vendorId to associate product with a user
+  promotionTag?: string; // Optional tag for sales, e.g., "25% OFF"
 };
 
 export type CartItem = {
@@ -40,5 +41,5 @@ export type Promotion = {
   description: string;
   imageUrl: string;
   imageHint: string;
-  link: string;
+  productId: string; // Link directly to a product
 };

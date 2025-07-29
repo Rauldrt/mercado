@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,12 +24,12 @@ const formSchema = z.object({
   description: z.string().min(10, { message: 'La descripción debe tener al menos 10 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, ingrese una URL de imagen válida.' }),
   imageHint: z.string().min(2, { message: 'La pista de imagen es requerida.' }),
-  link: z.string().min(1, { message: 'El enlace es requerido.' }),
+  productId: z.string().min(1, { message: 'El ID del producto es requerido.' }),
 });
 
 interface PromotionFormProps {
   promotion?: Promotion | null;
-  onSave: (promotion: Promotion) => void;
+  onSave: (promotion: Omit<Promotion, 'id'>) => void;
   onCancel: () => void;
 }
 
@@ -40,15 +41,12 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
       description: promotion?.description || '',
       imageUrl: promotion?.imageUrl || '',
       imageHint: promotion?.imageHint || '',
-      link: promotion?.link || '/#products',
+      productId: promotion?.productId || '',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const finalPromotion: Promotion = {
-      // Use the existing promotion ID if editing, or generate a new one if creating.
-      // The parent component will decide whether to use this ID for an update or discard it for creation.
-      id: promotion?.id || uuidv4(),
+    const finalPromotion: Omit<Promotion, 'id'> = {
       ...values,
     };
     onSave(finalPromotion);
@@ -103,11 +101,14 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
         />
         <FormField
           control={form.control}
-          name="link"
+          name="productId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Enlace</FormLabel>
-              <FormControl><Input placeholder="/#products" {...field} /></FormControl>
+              <FormLabel>ID del Producto a Enlazar</FormLabel>
+              <FormControl><Input placeholder="Pega el ID del producto aquí" {...field} /></FormControl>
+              <FormDescription>
+                Puedes encontrar el ID del producto en la URL de su página de detalle.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

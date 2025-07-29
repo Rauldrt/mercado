@@ -34,6 +34,7 @@ const formSchema = z.object({
     value: z.string().min(1, 'El valor no puede estar vacío.'),
   })),
   vendor: z.string().min(2, { message: 'El nombre del vendedor es requerido.'}),
+  promotionTag: z.string().optional(),
 });
 
 interface ProductFormProps {
@@ -71,6 +72,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
       vendor: product?.vendor || MOCK_ADMIN_DISPLAY_NAME,
+      promotionTag: product?.promotionTag || '',
     },
   });
 
@@ -158,17 +160,33 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="vendor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre del Vendedor/Tienda</FormLabel>
-              <FormControl><Input placeholder="Mi Tienda" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="vendor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre del Vendedor/Tienda</FormLabel>
+                  <FormControl><Input placeholder="Mi Tienda" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="promotionTag"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Etiqueta de Promoción (Opcional)</FormLabel>
+                  <FormControl><Input placeholder="25% OFF" {...field} /></FormControl>
+                   <FormDescription>
+                    Este texto aparecerá como una insignia sobre la imagen del producto.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        </div>
         
         {/* Image URLs */}
         <div className="space-y-4 rounded-md border p-4">

@@ -69,7 +69,7 @@ export default function PromotionsCard() {
                     <h3 className="text-2xl md:text-3xl font-bold font-headline">{promo.title}</h3>
                     <p className="mt-2 mb-4 max-w-md">{promo.description}</p>
                     <Button asChild>
-                      <Link href={promo.link}>Ver Oferta</Link>
+                      <Link href={`/product/${promo.productId}`}>Ver Oferta</Link>
                     </Button>
                   </div>
                 </CardContent>
