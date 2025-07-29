@@ -46,6 +46,8 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const finalPromotion: Promotion = {
+      // Use the existing promotion ID if editing, or generate a new one if creating.
+      // The parent component will decide whether to use this ID for an update or discard it for creation.
       id: promotion?.id || uuidv4(),
       ...values,
     };

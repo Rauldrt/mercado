@@ -70,16 +70,17 @@ export default function AdminPromotionsTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handlePromotionSave = async (promotionData: Omit<Promotion, 'id'> & { id?: string }) => {
+  const handlePromotionSave = async (promotionData: Promotion) => {
      try {
-      if (promotionData.id) {
+      // If the selectedPromotion exists, we are editing. Otherwise, we are adding.
+      if (selectedPromotion) {
         // Edit
         const { id, ...dataToUpdate } = promotionData;
         await updatePromotion(id, dataToUpdate);
         toast({ title: "Promoción Actualizada", description: `La promoción "${dataToUpdate.title}" se ha actualizado.` });
       } else {
         // Add
-        const { id, ...dataToAdd } = promotionData;
+        const { id, ...dataToAdd } = promotionData; // id is a uuid from the form, we discard it
         await addPromotion(dataToAdd);
         toast({ title: "Promoción Creada", description: `La promoción "${promotionData.title}" se ha añadido.` });
       }
@@ -194,7 +195,10 @@ export default function AdminPromotionsTable() {
             <PromotionForm
                 promotion={selectedPromotion}
                 onSave={handlePromotionSave}
-                onCancel={() => setFormOpen(false)}
+                onCancel={() => {
+                  setFormOpen(false);
+                  setSelectedPromotion(null);
+                }}
             />
         </DialogContent>
       </Dialog>
