@@ -69,7 +69,7 @@ export default function AdminCustomersTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handleCustomerSave = async (customerData: Omit<Customer, 'id'> & { id?: string }) => {
+  const handleCustomerSave = async (customerData: Omit<Customer, 'id' | 'purchaseHistory'> & { id?: string }) => {
     try {
       if (customerData.id) {
         // Edit
@@ -77,9 +77,13 @@ export default function AdminCustomersTable() {
         await updateCustomer(id, dataToUpdate);
         toast({ title: "Cliente Actualizado", description: `Los datos de "${dataToUpdate.firstName} ${dataToUpdate.lastName}" se han actualizado.` });
       } else {
-        // Add
+        // Add a new customer, ensuring they have an empty purchase history
         const { id, ...dataToAdd } = customerData;
-        await addCustomer(dataToAdd as Omit<Customer, 'id'>);
+        const newCustomer: Omit<Customer, 'id'> = {
+            ...dataToAdd,
+            purchaseHistory: []
+        };
+        await addCustomer(newCustomer);
         toast({ title: "Cliente Creado", description: `"${customerData.firstName} ${customerData.lastName}" se ha añadido a tu lista de clientes.` });
       }
       await fetchCustomers(); // Refresh list
@@ -143,7 +147,7 @@ export default function AdminCustomersTable() {
                 <TableCell className="font-medium">{`${customer.firstName} ${customer.lastName}`}</TableCell>
                 <TableCell>{customer.email}</TableCell>
                 <TableCell className="hidden md:table-cell">{customer.phoneNumber || 'N/A'}</TableCell>
-                <TableCell className="hidden md:table-cell">{customer.purchaseHistory.length}</TableCell>
+                <TableCell className="hidden md:table-cell">{customer.purchaseHistory?.length || 0}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
