@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Promotion } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -29,7 +28,7 @@ const formSchema = z.object({
 
 interface PromotionFormProps {
   promotion?: Promotion | null;
-  onSave: (promotion: Omit<Promotion, 'id'>) => void;
+  onSave: (promotion: Promotion) => void;
   onCancel: () => void;
 }
 
@@ -46,7 +45,8 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const finalPromotion: Omit<Promotion, 'id'> = {
+    const finalPromotion: Promotion = {
+      id: promotion?.id || '', // Keep existing id for updates
       ...values,
     };
     onSave(finalPromotion);
@@ -107,7 +107,7 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
               <FormLabel>ID del Producto a Enlazar</FormLabel>
               <FormControl><Input placeholder="Pega el ID del producto aquí" {...field} /></FormControl>
               <FormDescription>
-                Puedes encontrar el ID del producto en la URL de su página de detalle.
+                Puedes encontrar y copiar el ID desde la tabla de productos.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -122,3 +122,5 @@ export default function PromotionForm({ promotion, onSave, onCancel }: Promotion
     </Form>
   );
 }
+
+    

@@ -30,7 +30,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2, Copy } from "lucide-react";
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
@@ -113,6 +113,14 @@ export default function AdminProductsTable() {
        }
     }
   };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copiado",
+      description: "ID del producto copiado al portapapeles.",
+    });
+  }
   
   if (loading) {
     return (
@@ -138,9 +146,8 @@ export default function AdminProductsTable() {
                 Imagen
               </TableHead>
               <TableHead>Nombre</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead className="hidden md:table-cell">Stock</TableHead>
-              <TableHead className="hidden md:table-cell">Precio</TableHead>
+              <TableHead className="hidden md:table-cell">ID de Producto</TableHead>
+              <TableHead>Precio</TableHead>
               <TableHead>
                 <span className="sr-only">Acciones</span>
               </TableHead>
@@ -160,11 +167,15 @@ export default function AdminProductsTable() {
                   />
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {product.stock}
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs">{product.id}</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard(product.id)}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">
+                <TableCell>
                   ${new Intl.NumberFormat("es-AR").format(product.price)}
                 </TableCell>
                 <TableCell>
@@ -236,3 +247,5 @@ export default function AdminProductsTable() {
     </div>
   );
 }
+
+    
