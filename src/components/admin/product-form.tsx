@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,11 +34,12 @@ const formSchema = z.object({
     key: z.string().min(1, 'La clave no puede estar vacía.'),
     value: z.string().min(1, 'El valor no puede estar vacío.'),
   })),
+  vendor: z.string().min(2, { message: 'El nombre del vendedor es requerido.'}),
 });
 
 interface ProductFormProps {
   product?: Product | null;
-  onSave: (product: Product) => void;
+  onSave: (product: Omit<Product, 'vendorId'> & { vendorId?: string }) => void;
   onCancel: () => void;
 }
 
@@ -55,6 +57,7 @@ const specsToObject = (specs: { key: string; value: string }[]) => {
 };
 
 export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
+  const { user } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -65,6 +68,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       stock: product?.stock || 0,
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
+      vendor: product?.vendor || user?.displayName || '',
     },
   });
 
@@ -79,9 +83,10 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const finalProduct: Product = {
+    const finalProduct = {
       id: product?.id || uuidv4(),
       ...values,
+      vendorId: user!.uid,
       imageUrls: values.imageUrls.map(url => url.value),
       specifications: specsToObject(values.specifications),
     };
@@ -150,6 +155,18 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="vendor"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Vendedor/Tienda</FormLabel>
+              <FormControl><Input placeholder="Mi Tienda" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         {/* Image URLs */}
         <div className="space-y-4 rounded-md border p-4">

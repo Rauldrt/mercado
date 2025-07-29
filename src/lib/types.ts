@@ -8,6 +8,7 @@ export type Product = {
   specifications: Record<string, string>;
   stock: number;
   vendor: string;
+  vendorId: string; // Add vendorId to associate product with a user
 };
 
 export type CartItem = {

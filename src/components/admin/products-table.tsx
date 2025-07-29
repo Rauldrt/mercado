@@ -1,9 +1,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { products as initialProducts } from "@/lib/products";
 import type { Product } from "@/lib/types";
+import { useAuth } from "@/contexts/auth-context";
 import {
   Table,
   TableBody,
@@ -27,7 +28,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -35,14 +35,20 @@ import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
-import { ScrollArea } from "../ui/scroll-area";
 
 export default function AdminProductsTable() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const { user } = useAuth();
+  // We use the full product list to simulate the "database"
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
+
+  const vendorProducts = useMemo(() => {
+    if (!user) return [];
+    return allProducts.filter(p => p.vendorId === user.uid);
+  }, [allProducts, user]);
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
@@ -55,16 +61,19 @@ export default function AdminProductsTable() {
   };
 
   const handleProductSave = (productData: Product) => {
+    // Ensure new products are associated with the current user
+    const productToSave = { ...productData, vendorId: user!.uid };
+
     if (selectedProduct) {
       // Edit
-      setProducts(prev =>
-        prev.map(p => (p.id === productData.id ? productData : p))
+      setAllProducts(prev =>
+        prev.map(p => (p.id === productToSave.id ? productToSave : p))
       );
-       toast({ title: "Producto Actualizado", description: `"${productData.name}" se ha actualizado correctamente.` });
+       toast({ title: "Producto Actualizado", description: `"${productToSave.name}" se ha actualizado correctamente.` });
     } else {
       // Add
-      setProducts(prev => [...prev, productData]);
-       toast({ title: "Producto Creado", description: `"${productData.name}" se ha añadido a tu tienda.` });
+      setAllProducts(prev => [...prev, productToSave]);
+       toast({ title: "Producto Creado", description: `"${productToSave.name}" se ha añadido a tu tienda.` });
     }
     setFormOpen(false);
     setSelectedProduct(null);
@@ -72,7 +81,7 @@ export default function AdminProductsTable() {
 
   const handleDeleteProduct = () => {
     if (selectedProduct) {
-      setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+      setAllProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
       toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
     }
     setDeleteAlertOpen(false);
@@ -104,7 +113,7 @@ export default function AdminProductsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {vendorProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="hidden sm:table-cell">
                   <Image

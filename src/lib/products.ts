@@ -1,5 +1,8 @@
 import type { Product } from './types';
 
+// admin-user-01 is the ID of the mock user in auth-context.tsx
+const ADMIN_USER_ID = 'admin-user-01';
+
 export const products: Product[] = [
   {
     id: '1',
@@ -11,6 +14,7 @@ export const products: Product[] = [
     specifications: { material: 'Cuero Sintético', suela: 'Goma Antideslizante', color: 'Negro' },
     stock: 50,
     vendor: 'Urbano Zapas',
+    vendorId: ADMIN_USER_ID,
   },
   {
     id: '2',
@@ -22,6 +26,7 @@ export const products: Product[] = [
     specifications: { material: 'Calabaza y Cuero', virola: 'Acero Inoxidable', origen: 'Uruguay' },
     stock: 30,
     vendor: 'El Rincón del Matero',
+    vendorId: 'vendor-2',
   },
   {
     id: '3',
@@ -33,6 +38,7 @@ export const products: Product[] = [
     specifications: { conectividad: 'Bluetooth 5.2', autonomía: '20 horas', cancelación_ruido: 'Activa' },
     stock: 25,
     vendor: 'TecnoStore',
+    vendorId: 'vendor-3',
   },
   {
     id: '4',
@@ -44,6 +50,7 @@ export const products: Product[] = [
     specifications: { material: 'Denim 14oz', corte: 'Regular Fit', color: 'Azul Oscuro' },
     stock: 40,
     vendor: 'Ropa al Paso',
+    vendorId: 'vendor-4',
   },
   {
     id: '5',
@@ -55,6 +62,7 @@ export const products: Product[] = [
     specifications: { capacidad: '60 Litros', material: 'Nylon Ripstop', impermeable: 'Sí' },
     stock: 15,
     vendor: 'Aventura Extrema',
+    vendorId: 'vendor-5',
   },
   {
     id: '6',
@@ -66,6 +74,7 @@ export const products: Product[] = [
     specifications: { tipo_luz: 'LED Cálida', potencia: '8W', material: 'Aluminio' },
     stock: 60,
     vendor: 'El Rincón del Matero',
+    vendorId: 'vendor-2',
   },
     {
     id: '7',
@@ -77,6 +86,7 @@ export const products: Product[] = [
     specifications: { material: 'Cuero Vacuno', suela: 'FG (Firm Ground)', color: 'Blanco y Celeste' },
     stock: 22,
     vendor: 'Aventura Extrema',
+    vendorId: 'vendor-5',
   },
   {
     id: '8',
@@ -88,6 +98,19 @@ export const products: Product[] = [
     specifications: { resolucion: '4K UHD (3840x2160)', tamano: '55 pulgadas', sistema: 'Android TV' },
     stock: 10,
     vendor: 'TecnoStore',
+    vendorId: 'vendor-3',
+  },
+  {
+    id: '9',
+    name: 'Botas de Cuero "Gaucho"',
+    description: 'Botas de cuero genuino, hechas a mano por artesanos locales. Ideales para un look campero y elegante.',
+    price: 135000.00,
+    imageUrls: ['https://placehold.co/600x600', 'https://placehold.co/600x600'],
+    category: 'Calzado',
+    specifications: { material: 'Cuero Genuino', suela: 'Madera y Goma', color: 'Marrón' },
+    stock: 20,
+    vendor: 'Urbano Zapas',
+    vendorId: ADMIN_USER_ID,
   },
 ];
 
