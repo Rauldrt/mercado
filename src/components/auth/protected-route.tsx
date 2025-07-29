@@ -15,11 +15,13 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
 
   useEffect(() => {
+    // Wait until loading is finished before checking for user
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
+  // If loading, or if there's no user yet, show a loader
   if (loading || !user) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -28,5 +30,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // If user is authenticated, render the children
   return <>{children}</>;
 }

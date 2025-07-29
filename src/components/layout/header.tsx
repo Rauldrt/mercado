@@ -2,13 +2,12 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Menu, Search, LogOut, LogIn } from 'lucide-react';
+import { ShoppingCart, Heart, Search, LogOut, LogIn, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
 import { useAuth } from '@/contexts/auth-context';
-import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Skeleton } from '../ui/skeleton';
 
 
 export default function Header() {
@@ -74,9 +74,10 @@ export default function Header() {
               <span className="sr-only">Carrito de compras</span>
             </Link>
           </Button>
-
-          {!loading && (
-             user ? (
+          
+           {loading ? (
+             <Skeleton className="h-8 w-8 rounded-full" />
+           ) : user ? (
                  <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -89,22 +90,22 @@ export default function Header() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link href="/admin">Panel de Admin</Link></DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem asChild><Link href="/admin" className="flex items-center"><User className="mr-2 h-4 w-4"/>Panel de Admin</Link></DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
                       Cerrar Sesión
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex">
+                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
                   <Link href="/login">
-                     <LogIn className="h-5 w-5" />
-                     <span className="sr-only">Iniciar Sesión</span>
+                     <LogIn className="mr-2 h-4 w-4" />
+                     Ingresar
                   </Link>
                 </Button>
               )
-          )}
+          }
           
           <div className="md:hidden">
             {/* The trigger for the old mobile menu is removed. FAB is now the primary mobile navigation trigger. */}

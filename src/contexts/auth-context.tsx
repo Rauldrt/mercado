@@ -3,14 +3,20 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+
+// Mock User Type
+interface MockUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: MockUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  logout: () => Promise<void>;
+  signIn: () => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,45 +29,66 @@ export const useAuth = () => {
   return context;
 };
 
+// Mock user data
+const mockUser: MockUser = {
+  uid: 'admin-user-01',
+  email: 'admin@vidrieralocal.com',
+  displayName: 'Admin Local',
+  photoURL: 'https://placehold.co/100x100.png'
+};
+
+const AUTH_STORAGE_KEY = 'vidriera_local_auth';
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<MockUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const signInWithGoogle = useCallback(async () => {
-    setLoading(true);
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle user state update and redirect.
+      setLoading(true);
+      const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (storedAuth) {
+        setUser(JSON.parse(storedAuth));
+      }
     } catch (error) {
-      console.error("Error signing in with Google", error);
-      setLoading(false); // Ensure loading is false on error
+      console.error("Failed to parse auth state from localStorage", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const logout = useCallback(async () => {
+  const signIn = useCallback(() => {
+    setLoading(true);
     try {
-      await signOut(auth);
-      router.push('/');
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
+        setUser(mockUser);
+        router.push('/admin');
     } catch (error) {
-      console.error("Error signing out", error);
+        console.error("Failed to save auth state to localStorage", error);
+    } finally {
+        setLoading(false);
+    }
+  }, [router]);
+
+  const logout = useCallback(() => {
+    setLoading(true);
+    try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        setUser(null);
+        router.push('/');
+    } catch (error) {
+         console.error("Failed to remove auth state from localStorage", error);
+    } finally {
+        setLoading(false);
     }
   }, [router]);
 
   const value = {
     user,
     loading,
-    signInWithGoogle,
+    signIn,
     logout
   };
   
