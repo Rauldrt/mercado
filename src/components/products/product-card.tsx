@@ -61,10 +61,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group">
       <Link href={`/product/${product.id}`} className="block">
         <CardHeader className="p-0">
-          <div className="aspect-square relative">
+          <div className="aspect-square relative overflow-hidden">
             {product.promotionTag && (
               <Badge 
                 variant="destructive" 
@@ -77,7 +77,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.imageUrls[0]}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               data-ai-hint="product image"
             />
