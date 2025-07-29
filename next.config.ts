@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
         hostname: 'static.vecteezy.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'jdesblog.s3.eu-west-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
