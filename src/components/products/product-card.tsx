@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -85,12 +86,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0 flex gap-2">
         {quantityInCart === 0 ? (
-            <Button onClick={handleAddToCart} className="w-full">
+            <Button onClick={handleAddToCart} className="flex-grow">
               <ShoppingCart className="mr-2 h-4 w-4" />
               Agregar
             </Button>
         ) : (
-            <div className="flex items-center justify-center w-full gap-2">
+            <div className="flex items-center justify-center flex-grow gap-2">
                 <Button variant="outline" size="icon" onClick={handleDecreaseQuantity}>
                     <Minus className="h-4 w-4" />
                 </Button>
