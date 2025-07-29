@@ -14,7 +14,6 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:underline">Inicio</Link></li>
               <li><Link href="/#products" className="hover:underline">Productos</Link></li>
-              <li><Link href="/about" className="hover:underline">Sobre Nosotros</Link></li>
               <li><Link href="/admin" className="hover:underline">Administrador</Link></li>
             </ul>
           </div>
