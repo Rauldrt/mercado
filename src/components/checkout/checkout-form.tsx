@@ -216,7 +216,7 @@ export default function CheckoutForm({
             <CardHeader>
                 <CardTitle className="font-headline">Finalizar Compra</CardTitle>
                 <CardDescription>Selecciona tu método de pago y confirma tu pedido.</CardDescription>
-            </Header>
+            </CardHeader>
             <CardContent>
                 <div className="grid md:grid-cols-2 gap-6 items-start">
                     <FormField
