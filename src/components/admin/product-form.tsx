@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/auth-context';
+// import { useAuth } from '@/contexts/auth-context'; // Auth removed
 
 import { Button } from '@/components/ui/button';
 import {
@@ -55,8 +55,11 @@ const specsToObject = (specs: { key: string; value: string }[]) => {
   }, {} as Record<string, string>);
 };
 
+const MOCK_ADMIN_USER_ID = "admin_user_id";
+const MOCK_ADMIN_DISPLAY_NAME = "Admin Store";
+
 export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Auth removed
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,7 +70,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       stock: product?.stock || 0,
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
-      vendor: product?.vendor || user?.displayName || '',
+      vendor: product?.vendor || MOCK_ADMIN_DISPLAY_NAME,
     },
   });
 
@@ -82,14 +85,10 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
-        console.error("No user found, cannot save product.");
-        return;
-    }
     const finalProduct = {
       id: product?.id,
       ...values,
-      vendorId: user.uid,
+      vendorId: MOCK_ADMIN_USER_ID, // Use mock admin ID
       imageUrls: values.imageUrls.map(url => url.value),
       specifications: specsToObject(values.specifications),
     };

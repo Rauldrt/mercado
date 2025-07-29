@@ -6,11 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AdminProductsTable from "@/components/admin/products-table";
 import AdminCustomersTable from "@/components/admin/customers-table";
 import AdminPromotionsTable from "@/components/admin/promotions-table";
-import ProtectedRoute from "@/components/auth/protected-route";
 
 function AdminDashboard() {
   return (
-    <ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Panel de Administración</h1>
         <Tabs defaultValue="products">
@@ -60,7 +58,6 @@ function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </ProtectedRoute>
   )
 }
 

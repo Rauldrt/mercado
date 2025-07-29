@@ -2,37 +2,15 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, Search, LogOut, LogIn, User } from 'lucide-react';
+import { ShoppingCart, Heart, Search, User, PanelTop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
-import { useAuth } from '@/contexts/auth-context';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Skeleton } from '../ui/skeleton';
-
 
 export default function Header() {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const { user, logout, loading } = useAuth();
-
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[1][0]}`;
-    }
-    return names[0][0];
-  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -75,37 +53,12 @@ export default function Header() {
             </Link>
           </Button>
           
-           {loading ? (
-             <Skeleton className="h-8 w-8 rounded-full" />
-           ) : user ? (
-                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                       <Avatar className="h-8 w-8">
-                         <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
-                         <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
-                       </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link href="/admin" className="flex items-center"><User className="mr-2 h-4 w-4"/>Panel de Admin</Link></DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout} className="text-destructive">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Cerrar Sesión
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
-                  <Link href="/login">
-                     <LogIn className="mr-2 h-4 w-4" />
-                     Ingresar
-                  </Link>
-                </Button>
-              )
-          }
+          <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+              <Link href="/admin">
+                  <PanelTop className="mr-2 h-4 w-4" />
+                  Admin
+              </Link>
+          </Button>
           
           <div className="md:hidden">
             {/* The trigger for the old mobile menu is removed. FAB is now the primary mobile navigation trigger. */}

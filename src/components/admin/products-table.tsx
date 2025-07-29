@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Product } from "@/lib/types";
-import { useAuth } from "@/contexts/auth-context";
+// import { useAuth } from "@/contexts/auth-context"; // Auth removed
 import {
   Table,
   TableBody,
@@ -34,10 +34,12 @@ import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-reac
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
-import { getProductsByVendorId, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
+import { getProductsByVendorId, addProduct, updateProduct, deleteProduct, getProducts } from "@/lib/firebase";
+
+const MOCK_ADMIN_USER_ID = "admin_user_id";
 
 export default function AdminProductsTable() {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Auth removed
   const [vendorProducts, setVendorProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -46,12 +48,12 @@ export default function AdminProductsTable() {
   const { toast } = useToast();
 
   const fetchVendorProducts = useCallback(async () => {
-    if (!user) return;
     setLoading(true);
-    const products = await getProductsByVendorId(user.uid);
+    // Fetch all products since there's no logged-in user
+    const products = await getProducts();
     setVendorProducts(products);
     setLoading(false);
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     fetchVendorProducts();
