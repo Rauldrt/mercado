@@ -41,6 +41,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
+    // Explicitly set the authDomain to prevent configuration issues in different environments
+    provider.setCustomParameters({
+        'auth_domain': auth.config.authDomain
+    });
     try {
       setLoading(true);
       await signInWithPopup(auth, provider);
