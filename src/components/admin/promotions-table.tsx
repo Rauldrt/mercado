@@ -144,7 +144,7 @@ export default function AdminPromotionsTable() {
 
        {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedPromotion ? 'Editar Promoción' : 'Añadir Nueva Promoción'}</DialogTitle>
             <DialogDescription>
