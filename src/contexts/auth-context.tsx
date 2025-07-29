@@ -40,21 +40,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    setLoading(true);
     const provider = new GoogleAuthProvider();
-    // Explicitly set the authDomain to prevent configuration issues in different environments
     provider.setCustomParameters({
         'auth_domain': auth.config.authDomain
     });
     try {
-      setLoading(true);
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state update
+      // onAuthStateChanged will handle the user state update and setLoading(false)
       const redirectPath = pathname === '/login' ? '/' : pathname;
       router.push(redirectPath);
     } catch (error) {
       console.error("Error signing in with Google", error);
-    } finally {
-      // setLoading(false) is managed by onAuthStateChanged
+      setLoading(false); // Ensure loading is false on error
     }
   }, [router, pathname]);
 
@@ -74,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout
   };
 
-  if (loading) {
+  if (loading && !user) { // Show loader only on initial load or during operations
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
