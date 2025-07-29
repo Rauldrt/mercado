@@ -3,25 +3,27 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, ShoppingBag, Heart, ShoppingCart, User, Plus, X } from 'lucide-react';
+import { Home, ShoppingBag, Heart, ShoppingCart, User, Plus, X, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
+import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
-
-const menuItems = [
-  { href: '/', label: 'Inicio', icon: Home },
-  { href: '/#products', label: 'Productos', icon: ShoppingBag },
-  { href: '/wishlist', label: 'Deseos', icon: Heart, badge: 'wishlist' },
-  { href: '/checkout', label: 'Carrito', icon: ShoppingCart, badge: 'cart' },
-  { href: '/admin', label: 'Admin', icon: User },
-];
 
 export default function MobileFabMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user } = useAuth();
+
+  const menuItems = [
+    { href: '/', label: 'Inicio', icon: Home },
+    { href: '/#products', label: 'Productos', icon: ShoppingBag },
+    { href: '/wishlist', label: 'Deseos', icon: Heart, badge: 'wishlist' },
+    { href: '/checkout', label: 'Carrito', icon: ShoppingCart, badge: 'cart' },
+    { href: user ? '/admin' : '/login', label: user ? 'Admin' : 'Ingresar', icon: user ? User : LogIn },
+  ];
 
   const getBadgeCount = (badge?: string) => {
     if (badge === 'cart') return cartCount;

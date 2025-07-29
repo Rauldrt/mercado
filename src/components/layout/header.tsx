@@ -1,22 +1,38 @@
+
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Menu, Search } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, Search, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
+import { useAuth } from '@/contexts/auth-context';
 import { useState } from 'react';
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+
 
 export default function Header() {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout, loading } = useAuth();
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[1][0]}`;
+    }
+    return names[0][0];
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,7 +55,6 @@ export default function Header() {
             <span className="sr-only">Buscar</span>
           </Button>
 
-          {/* Icons hidden on mobile, will be in FAB */}
           <Button variant="ghost" size="icon" asChild className="relative hidden md:inline-flex">
             <Link href="/wishlist">
               <Heart className="h-5 w-5" />
@@ -60,14 +75,37 @@ export default function Header() {
             </Link>
           </Button>
 
-          <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
-            <Link href="/admin">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Perfil de usuario</span>
-            </Link>
-          </Button>
+          {!loading && (
+             user ? (
+                 <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                       <Avatar className="h-8 w-8">
+                         <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'Usuario'} />
+                         <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+                       </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild><Link href="/admin">Panel de Admin</Link></DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Cerrar Sesión
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild variant="ghost" size="icon" className="hidden md:inline-flex">
+                  <Link href="/login">
+                     <LogIn className="h-5 w-5" />
+                     <span className="sr-only">Iniciar Sesión</span>
+                  </Link>
+                </Button>
+              )
+          )}
           
-          {/* This Sheet is kept for the original mobile menu, but the trigger is removed. The new FAB will handle mobile nav. */}
           <div className="md:hidden">
             {/* The trigger for the old mobile menu is removed. FAB is now the primary mobile navigation trigger. */}
           </div>
