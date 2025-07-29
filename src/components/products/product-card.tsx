@@ -78,7 +78,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-4 flex-grow">
         <Link href={`/product/${product.id}`} className="block">
           <CardTitle className="text-lg font-medium leading-tight mb-1 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground mb-2">{product.vendor}</CardDescription>
+        </Link>
+        <Link href={`/vendor/${encodeURIComponent(product.vendor)}`} className="block">
+            <CardDescription className="text-sm text-muted-foreground mb-2 hover:text-primary hover:underline">{product.vendor}</CardDescription>
+        </Link>
+        <Link href={`/product/${product.id}`} className="block">
           <p className="text-2xl font-bold text-foreground">
             ${new Intl.NumberFormat('es-AR').format(product.price)}
           </p>

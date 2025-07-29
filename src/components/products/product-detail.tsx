@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Product } from '@/lib/types';
@@ -8,6 +9,7 @@ import { useWishlist } from '@/contexts/wishlist-context';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Link from 'next/link';
 
 interface ProductDetailProps {
   product: Product;
@@ -46,7 +48,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     <div className="flex flex-col gap-6">
       <div className="space-y-2">
         <h1 className="text-3xl lg:text-4xl font-bold tracking-tight font-headline">{product.name}</h1>
-        <p className="text-lg text-muted-foreground">Vendido por: <span className="font-semibold text-foreground">{product.vendor}</span></p>
+        <p className="text-lg text-muted-foreground">Vendido por: 
+            <Link href={`/vendor/${encodeURIComponent(product.vendor)}`} className="font-semibold text-foreground hover:underline ml-1">
+                {product.vendor}
+            </Link>
+        </p>
         <p className="text-3xl font-bold text-foreground">
           ${new Intl.NumberFormat('es-AR').format(product.price)}
         </p>
