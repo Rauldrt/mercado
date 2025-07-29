@@ -9,7 +9,7 @@ const firebaseConfig = {
   appId: "1:986534409565:web:2267108c210a31c98364b4",
   storageBucket: "mercado-argentino-online.firebasestorage.app",
   apiKey: "AIzaSyBHbCbynS3EIcHcU6Ib_iVEcNSh-K4rJDQ",
-  // authDomain: "mercado-argentino-online.firebaseapp.com", // Se comenta para permitir que el SDK lo detecte
+  authDomain: "mercado-argentino-online.firebaseapp.com",
   measurementId: "",
   messagingSenderId: "986534409565",
 };
