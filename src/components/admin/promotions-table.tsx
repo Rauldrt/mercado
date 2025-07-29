@@ -70,18 +70,15 @@ export default function AdminPromotionsTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handlePromotionSave = async (promotionData: Promotion) => {
+  const handlePromotionSave = async (promotionData: Omit<Promotion, 'id'>) => {
      try {
-      // If the selectedPromotion exists, we are editing. Otherwise, we are adding.
-      if (selectedPromotion) {
+      if (selectedPromotion?.id) {
         // Edit
-        const { id, ...dataToUpdate } = promotionData;
-        await updatePromotion(id, dataToUpdate);
-        toast({ title: "Promoción Actualizada", description: `La promoción "${dataToUpdate.title}" se ha actualizado.` });
+        await updatePromotion(selectedPromotion.id, promotionData);
+        toast({ title: "Promoción Actualizada", description: `La promoción "${promotionData.title}" se ha actualizado.` });
       } else {
         // Add
-        const { id, ...dataToAdd } = promotionData; // id is a uuid from the form, we discard it
-        await addPromotion(dataToAdd);
+        await addPromotion(promotionData);
         toast({ title: "Promoción Creada", description: `La promoción "${promotionData.title}" se ha añadido.` });
       }
       await fetchPromotions(); // Refresh list
