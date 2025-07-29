@@ -10,6 +10,7 @@ import '@/lib/firebase'; // Ensure Firebase is initialized
 export const metadata: Metadata = {
   title: 'Ndera-Store',
   description: 'Tu vidriera digital para potenciar el comercio local.',
+  manifest: '/manifest.webmanifest',
 };
 
 export default function RootLayout({
