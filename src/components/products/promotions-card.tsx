@@ -76,10 +76,7 @@ export default function PromotionsCard() {
                     alt={promo.title}
                     fill
                     className={cn(
-                        "object-cover transition-transform ease-in-out",
-                        current === index + 1 
-                          ? "scale-110 duration-[6000ms]" 
-                          : "scale-100 duration-500"
+                        "object-cover animate-subtle-zoom"
                     )}
                     data-ai-hint={promo.imageHint}
                     priority={index === 0} // Prioritize loading the first image
