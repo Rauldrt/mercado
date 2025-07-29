@@ -56,8 +56,8 @@ export default function CheckoutForm({
     onDownloadPdf,
     onShareWhatsApp
 }: CheckoutFormProps) {
-    const { toast } = useToast();
-    const { cartItems } = useCart();
+  const { toast } = useToast();
+  const { cartItems } = useCart();
 
   const form = useForm<z.infer<typeof checkoutFormSchema>>({
     resolver: zodResolver(checkoutFormSchema),
