@@ -11,8 +11,8 @@ import { Loader2 } from 'lucide-react';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: () => void;
-  logout: () => void;
+  signIn: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,32 +42,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback(async () => {
     setLoading(true);
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
-      // Forzar personalización para intentar resolver problemas de configuración
-      provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
-      router.push('/admin');
+      // Let the onAuthStateChanged listener handle the user state and routing
     } catch (error) {
       console.error("Error during sign-in:", error);
-    } finally {
-      // No establecemos loading a false aquí porque onAuthStateChanged se encargará de ello
+      // Optionally, show a toast to the user
+      setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   const logout = useCallback(async () => {
-    setLoading(true);
     try {
       await firebaseSignOut(auth);
       router.push('/');
     } catch (error) {
       console.error("Error during sign-out:", error);
-    } finally {
-      // onAuthStateChanged se activará y establecerá el usuario a null y loading a false
     }
   }, [router]);
 
-  if (loading) {
+  if (loading && user === null) {
      return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
