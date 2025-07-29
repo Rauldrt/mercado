@@ -5,6 +5,7 @@ import { Providers } from '@/components/providers';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import MobileFabMenu from '@/components/layout/mobile-fab-menu';
+import '@/lib/firebase'; // Ensure Firebase is initialized
 
 export const metadata: Metadata = {
   title: 'Ndera-Store',
