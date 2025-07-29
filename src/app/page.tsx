@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import ProductGrid from '@/components/products/product-grid';
 import ProductFilters from '@/components/products/product-filters';
 import type { Product } from '@/lib/types';
@@ -11,7 +11,12 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescri
 import CategoryCarousel from '@/components/products/category-carousel';
 import PromotionsCard from '@/components/products/promotions-card';
 import { getProducts } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
 
+
+function PromotionCardFallback() {
+  return <Skeleton className="w-full h-[250px] md:h-[400px]" />
+}
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -88,7 +93,9 @@ export default function Home() {
       </div>
 
       <div className="mb-12">
-        <PromotionsCard />
+        <Suspense fallback={<PromotionCardFallback />}>
+          <PromotionsCard />
+        </Suspense>
       </div>
 
       <div className="mb-12">

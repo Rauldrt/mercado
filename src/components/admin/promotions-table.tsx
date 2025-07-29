@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
-import { promotions as initialPromotions } from "@/lib/promotions";
+import { useState, useEffect, useCallback } from "react";
 import type { Promotion } from "@/lib/types";
 import {
   Table,
@@ -30,17 +29,36 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import PromotionForm from "./promotion-form";
 import { useToast } from "@/hooks/use-toast";
+import { getPromotions, addPromotion, updatePromotion, deletePromotion } from "@/lib/firebase";
 
 export default function AdminPromotionsTable() {
-  const [promotions, setPromotions] = useState<Promotion[]>(initialPromotions);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
+
+  const fetchPromotions = useCallback(async () => {
+    setLoading(true);
+    try {
+        const fetchedPromotions = await getPromotions();
+        setPromotions(fetchedPromotions);
+    } catch (error) {
+        console.error("Failed to fetch promotions:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar las promociones." });
+    } finally {
+        setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchPromotions();
+  }, [fetchPromotions]);
 
   const handleOpenForm = (promotion: Promotion | null) => {
     setSelectedPromotion(promotion);
@@ -52,30 +70,52 @@ export default function AdminPromotionsTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handlePromotionSave = (promotionData: Promotion) => {
-    if (selectedPromotion) {
-      // Edit
-      setPromotions(prev =>
-        prev.map(p => (p.id === promotionData.id ? promotionData : p))
-      );
-       toast({ title: "Promoción Actualizada", description: `La promoción "${promotionData.title}" se ha actualizado.` });
-    } else {
-      // Add
-      setPromotions(prev => [...prev, promotionData]);
-       toast({ title: "Promoción Creada", description: `La promoción "${promotionData.title}" se ha añadido.` });
+  const handlePromotionSave = async (promotionData: Omit<Promotion, 'id'> & { id?: string }) => {
+     try {
+      if (promotionData.id) {
+        // Edit
+        const { id, ...dataToUpdate } = promotionData;
+        await updatePromotion(id, dataToUpdate);
+        toast({ title: "Promoción Actualizada", description: `La promoción "${dataToUpdate.title}" se ha actualizado.` });
+      } else {
+        // Add
+        const { id, ...dataToAdd } = promotionData;
+        await addPromotion(dataToAdd);
+        toast({ title: "Promoción Creada", description: `La promoción "${promotionData.title}" se ha añadido.` });
+      }
+      await fetchPromotions(); // Refresh list
+    } catch (error) {
+       toast({ variant: "destructive", title: "Error", description: "No se pudo guardar la promoción." });
+       console.error("Failed to save promotion:", error);
+    } finally {
+        setFormOpen(false);
+        setSelectedPromotion(null);
     }
-    setFormOpen(false);
-    setSelectedPromotion(null);
   };
 
-  const handleDeletePromotion = () => {
+  const handleDeletePromotion = async () => {
     if (selectedPromotion) {
-      setPromotions(prev => prev.filter(p => p.id !== selectedPromotion.id));
-      toast({ title: "Promoción Eliminada", description: `La promoción "${selectedPromotion.title}" se ha eliminado.` });
+      try {
+        await deletePromotion(selectedPromotion.id);
+        toast({ title: "Promoción Eliminada", description: `La promoción "${selectedPromotion.title}" se ha eliminado.` });
+        await fetchPromotions(); // Refresh list
+      } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar la promoción." });
+        console.error("Failed to delete promotion:", error);
+      } finally {
+        setDeleteAlertOpen(false);
+        setSelectedPromotion(null);
+      }
     }
-    setDeleteAlertOpen(false);
-    setSelectedPromotion(null);
   };
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div>
@@ -109,7 +149,7 @@ export default function AdminPromotionsTable() {
                     height="64"
                     src={promo.imageUrl}
                     width="128"
-                    data-ai-hint="promotion thumbnail"
+                    data-ai-hint={promo.imageHint}
                   />
                 </TableCell>
                 <TableCell className="font-medium">{promo.title}</TableCell>

@@ -1,6 +1,4 @@
 
-"use client"
-
 import * as React from "react"
 import Autoplay from "embla-carousel-autoplay"
 import {
@@ -14,32 +12,36 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "../ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { promotions as allPromotions } from "@/lib/promotions"
+import { getPromotions } from "@/lib/firebase"
 import type { Promotion } from "@/lib/types"
 
-export default function PromotionsCard() {
+export default async function PromotionsCard() {
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   )
   
-  // In a real app, this would be fetched from the admin state,
-  // but for now we'll use the static data.
-  const [promotions, setPromotions] = React.useState<Promotion[]>(allPromotions);
+  const promotions = await getPromotions();
 
   if (promotions.length === 0) {
-    return null;
+    return null; // Don't render anything if there are no promotions
   }
 
   return (
     <Carousel
-      plugins={[plugin.current]}
+      // The plugin is now passed correctly for server components
+      plugins={[
+        Autoplay({
+          delay: 5000,
+          stopOnInteraction: true,
+        }),
+      ]}
       className="w-full h-full"
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.reset}
+      // onMouseEnter and onMouseLeave are client-side events and cannot be used here
+      // Autoplay plugin handles stopOnInteraction by default.
     >
       <CarouselContent className="h-full">
         {promotions.map((promo, index) => (
-          <CarouselItem key={index} className="h-full">
+          <CarouselItem key={promo.id || index} className="h-full">
             <div className="p-1 h-full">
               <Card className="h-full overflow-hidden">
                 <CardContent className="relative flex h-full items-center justify-center p-0">
@@ -49,6 +51,7 @@ export default function PromotionsCard() {
                     fill
                     className="object-cover"
                     data-ai-hint={promo.imageHint}
+                    priority={index === 0} // Prioritize loading the first image
                   />
                   <div className="absolute inset-0 bg-black/50" />
                   <div className="relative z-10 text-white text-center p-6 flex flex-col items-center">
@@ -69,3 +72,4 @@ export default function PromotionsCard() {
     </Carousel>
   )
 }
+

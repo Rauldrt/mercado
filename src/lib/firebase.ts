@@ -2,7 +2,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import type { Product } from './types';
+import type { Product, Promotion } from './types';
 
 const firebaseConfig = {
   projectId: "mercado-argentino-online",
@@ -20,9 +20,10 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const productsCollection = collection(db, 'products');
+const promotionsCollection = collection(db, 'promotions');
 
 // Helper to convert Firestore doc to Product
-const fromFirestore = (doc: any): Product => {
+const productFromFirestore = (doc: any): Product => {
     const data = doc.data();
     return {
         id: doc.id,
@@ -38,17 +39,30 @@ const fromFirestore = (doc: any): Product => {
     };
 }
 
+// Helper to convert Firestore doc to Promotion
+const promotionFromFirestore = (doc: any): Promotion => {
+    const data = doc.data();
+    return {
+        id: doc.id,
+        title: data.title,
+        description: data.description,
+        imageUrl: data.imageUrl,
+        imageHint: data.imageHint,
+        link: data.link,
+    };
+}
+
 // Product Operations
 export const getProducts = async (): Promise<Product[]> => {
     const snapshot = await getDocs(productsCollection);
-    return snapshot.docs.map(fromFirestore);
+    return snapshot.docs.map(productFromFirestore);
 }
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
     const docRef = doc(db, 'products', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-        return fromFirestore(docSnap);
+        return productFromFirestore(docSnap);
     }
     return undefined;
 }
@@ -56,13 +70,13 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 export const getProductsByVendor = async (vendorName: string): Promise<Product[]> => {
     const q = query(productsCollection, where("vendor", "==", vendorName));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(fromFirestore);
+    return snapshot.docs.map(productFromFirestore);
 }
 
 export const getProductsByVendorId = async (vendorId: string): Promise<Product[]> => {
     const q = query(productsCollection, where("vendorId", "==", vendorId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(fromFirestore);
+    return snapshot.docs.map(productFromFirestore);
 }
 
 export const addProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
@@ -77,6 +91,27 @@ export const updateProduct = async (id: string, productUpdate: Partial<Product>)
 
 export const deleteProduct = async (id: string): Promise<void> => {
     const docRef = doc(db, 'products', id);
+    await deleteDoc(docRef);
+}
+
+// Promotion Operations
+export const getPromotions = async (): Promise<Promotion[]> => {
+    const snapshot = await getDocs(promotionsCollection);
+    return snapshot.docs.map(promotionFromFirestore);
+}
+
+export const addPromotion = async (promotion: Omit<Promotion, 'id'>): Promise<Promotion> => {
+    const docRef = await addDoc(promotionsCollection, promotion);
+    return { id: docRef.id, ...promotion };
+}
+
+export const updatePromotion = async (id: string, promotionUpdate: Partial<Promotion>): Promise<void> => {
+    const docRef = doc(db, 'promotions', id);
+    await updateDoc(docRef, promotionUpdate);
+}
+
+export const deletePromotion = async (id: string): Promise<void> => {
+    const docRef = doc(db, 'promotions', id);
     await deleteDoc(docRef);
 }
 
