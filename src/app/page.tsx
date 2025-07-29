@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ProductGrid from '@/components/products/product-grid';
 import ProductFilters from '@/components/products/product-filters';
 import type { Product } from '@/lib/types';
@@ -18,14 +19,20 @@ function PromotionCardFallback() {
   return <Skeleton className="w-full h-[250px] md:h-[400px]" />
 }
 
-export default function Home() {
+function HomePageContent() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [subtitle, setSubtitle] = useState("Explora los productos y servicios de tu comunidad");
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+  const initialSearchQuery = searchParams.get('q') || '';
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [isSheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    setSearchQuery(initialSearchQuery);
+  }, [initialSearchQuery]);
 
   useEffect(() => {
     const fetchProductsAndSettings = async () => {
@@ -115,7 +122,7 @@ export default function Home() {
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold tracking-tight font-headline">
-          {selectedCategory === 'all' ? 'Todos los Productos' : selectedCategory}
+          {searchQuery ? `Resultados para "${searchQuery}"` : (selectedCategory === 'all' ? 'Todos los Productos' : selectedCategory)}
         </h2>
         <div className="flex items-center gap-4">
             <p className="text-sm text-muted-foreground hidden sm:block">{filteredProducts.length} resultados</p>
@@ -155,4 +162,13 @@ export default function Home() {
       )}
     </div>
   );
+}
+
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <HomePageContent />
+    </Suspense>
+  )
 }

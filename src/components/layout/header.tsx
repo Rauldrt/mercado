@@ -2,11 +2,12 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, Search } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
 import { useWishlist } from '@/contexts/wishlist-context';
+import { SearchDialog } from './search-dialog';
 
 export default function Header() {
   const { cartCount } = useCart();
@@ -28,10 +29,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Buscar</span>
-          </Button>
+          <SearchDialog />
 
           <Button variant="ghost" size="icon" asChild className="relative hidden md:inline-flex">
             <Link href="/wishlist">
