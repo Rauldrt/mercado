@@ -84,7 +84,8 @@ export default function AdminProductsTable() {
         toast({ title: "Producto Actualizado", description: `"${dataToUpdate.name}" se ha actualizado correctamente.` });
       } else {
         // Add
-        await addProduct(productData as Omit<Product, 'id'>);
+        const { id, ...dataToAdd } = productData; // Destructure to remove id
+        await addProduct(dataToAdd);
         toast({ title: "Producto Creado", description: `"${productData.name}" se ha añadido a tu tienda.` });
       }
       await fetchVendorProducts(); // Refresh list
@@ -118,7 +119,7 @@ export default function AdminProductsTable() {
         <div className="flex justify-center items-center py-10">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-    )
+    );
   }
 
   return (

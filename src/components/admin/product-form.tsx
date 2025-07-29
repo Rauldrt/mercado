@@ -228,9 +228,11 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
                         </FormItem>
                     )}
                 />
-                <Button className="mt-8" type="button" variant="destructive" size="icon" onClick={() => removeSpec(index)}>
-                    <Trash2 className="h-4 w-4" />
-                </Button>
+                 {specFields.length > 1 && (
+                    <Button className="mt-8" type="button" variant="destructive" size="icon" onClick={() => removeSpec(index)}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                 )}
             </div>
            ))}
             <Button type="button" size="sm" variant="outline" onClick={() => appendSpec({ key: '', value: '' })}>
