@@ -44,6 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      // Forzar personalización para intentar resolver problemas de configuración
+      provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
       router.push('/admin');
     } catch (error) {
