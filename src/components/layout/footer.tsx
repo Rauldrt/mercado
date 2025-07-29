@@ -14,7 +14,8 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:underline">Inicio</Link></li>
               <li><Link href="/#products" className="hover:underline">Productos</Link></li>
-              <li><Link href="/admin" className="hover:underline">Administrador</Link></li>
+              {/* This link will only be visible on screens smaller than md (768px) */}
+              <li className="md:hidden"><Link href="/admin" className="hover:underline">Administrador</Link></li>
             </ul>
           </div>
           <div>
