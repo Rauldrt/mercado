@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, signInWithGoogle, loading } = useAuth();
@@ -27,12 +28,17 @@ export default function LoginPage() {
   );
 
 
-  if (loading || user) {
+  if (loading) {
     return (
         <div className="flex min-h-screen items-center justify-center">
-            {/* You can add a spinner here */}
+            <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     )
+  }
+
+  // Don't render the login page if the user is already logged in
+  if (user) {
+    return null;
   }
 
   return (
@@ -47,7 +53,6 @@ export default function LoginPage() {
             variant="outline"
             className="w-full"
             onClick={signInWithGoogle}
-            disabled={loading}
           >
             <GoogleIcon className="mr-2 h-5 w-5" />
             Continuar con Google

@@ -5,7 +5,6 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { useRouter, usePathname } from 'next/navigation';
 import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
@@ -28,7 +27,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -47,14 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     try {
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state update and setLoading(false)
-      const redirectPath = pathname === '/login' ? '/' : pathname;
-      router.push(redirectPath);
+      // onAuthStateChanged will handle user state update. 
+      // Successful sign-in will trigger the useEffect in ProtectedRoute or LoginPage to redirect.
     } catch (error) {
       console.error("Error signing in with Google", error);
-      setLoading(false); // Ensure loading is false on error
+    } finally {
+      // setLoading will be updated by onAuthStateChanged listener
     }
-  }, [router, pathname]);
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -71,14 +69,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signInWithGoogle,
     logout
   };
-
-  if (loading && !user) { // Show loader only on initial load or during operations
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
+  
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
