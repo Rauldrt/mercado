@@ -2,25 +2,19 @@
 "use client";
 
 import { useAuth } from '@/contexts/auth-context';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const { user, signIn, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && user) {
-      router.push('/admin');
-    }
-  }, [user, loading, router]);
   
-  // Muestra un loader si el usuario ya existe (y está a punto de ser redirigido)
-  // o si el proceso de autenticación general está en curso.
+  // The AuthProvider now handles all redirection logic.
+  // This page just needs to show the button or a loading state.
+
   if (loading || user) {
+    // If auth state is loading, or if a user is found (and redirection is imminent),
+    // show a loader to prevent the user from clicking anything.
     return (
         <div className="flex min-h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -41,13 +35,9 @@ export default function LoginPage() {
             variant="default"
             className="w-full"
             onClick={signIn}
-            disabled={loading} // El botón se desactiva mientras carga
+            disabled={loading}
           >
-            {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <LogIn className="mr-2 h-5 w-5" />
-            )}
+            <LogIn className="mr-2 h-5 w-5" />
             Iniciar Sesión como Admin
           </Button>
         </CardContent>
