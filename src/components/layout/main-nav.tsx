@@ -1,10 +1,12 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { getProductsByCategory, products } from '@/lib/products';
 import { useMemo } from 'react';
+// Note: We are keeping the component client-side for now to avoid complexity,
+// but category fetching could be moved to the server.
 
 interface MainNavProps {
   vertical?: boolean;
@@ -13,11 +15,6 @@ interface MainNavProps {
 
 export default function MainNav({ vertical = false, onClose }: MainNavProps) {
   const pathname = usePathname();
-  const categories = useMemo(() => {
-    const allCategories = products.map(p => p.category);
-    return ['Todos', ...Array.from(new Set(allCategories))];
-  }, []);
-
 
   const navClass = cn(
     'flex items-center space-x-4 lg:space-x-6',

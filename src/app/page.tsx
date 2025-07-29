@@ -1,27 +1,40 @@
+
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import ProductGrid from '@/components/products/product-grid';
 import ProductFilters from '@/components/products/product-filters';
-import { products as allProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
+import { Filter, Loader2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import CategoryCarousel from '@/components/products/category-carousel';
 import PromotionsCard from '@/components/products/promotions-card';
+import { getProducts } from '@/lib/firebase';
 
 
 export default function Home() {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [isSheetOpen, setSheetOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const products = await getProducts();
+      setAllProducts(products);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
   const categories = useMemo(() => {
     const allCategories = allProducts.map(p => p.category);
     return ['all', ...Array.from(new Set(allCategories))];
-  }, []);
+  }, [allProducts]);
 
   const carouselCategories = useMemo(() => {
     return categories.filter(c => c !== 'all');
@@ -38,7 +51,7 @@ export default function Home() {
       
       return matchesCategory && matchesPrice && matchesSearch;
     });
-  }, [searchQuery, selectedCategory, priceRange]);
+  }, [searchQuery, selectedCategory, priceRange, allProducts]);
   
   const handleCategorySelect = (category: string) => {
     if (selectedCategory === category) {
@@ -114,7 +127,11 @@ export default function Home() {
         </div>
       </div>
       
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+         <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+         </div>
+      ) : filteredProducts.length > 0 ? (
         <ProductGrid products={filteredProducts} />
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center">

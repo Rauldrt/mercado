@@ -1,5 +1,5 @@
 
-import { products } from '@/lib/products';
+import { getProductsByVendor } from '@/lib/firebase';
 import ProductGrid from '@/components/products/product-grid';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -11,23 +11,22 @@ interface VendorPageProps {
   };
 }
 
-export default function VendorPage({ params }: VendorPageProps) {
+export default async function VendorPage({ params }: VendorPageProps) {
   // Decode the vendor name from the URL (e.g., "Urbano%20Zapas" -> "Urbano Zapas")
   const vendorName = decodeURIComponent(params.vendorName);
   
   // Find all products by this vendor
-  const vendorProducts = products.filter(p => p.vendor === vendorName);
+  const vendorProducts = await getProductsByVendor(vendorName);
   
-  // Check if the vendor exists by seeing if there's at least one product
-  const vendorExists = products.some(p => p.vendor === vendorName);
-
-  if (!vendorExists) {
+  // For this page, we assume the vendor exists if they have products.
+  // A more robust solution would be to have a separate 'vendors' collection in Firestore.
+  if (vendorProducts.length === 0) {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <h1 className="text-3xl font-bold tracking-tight mb-4 font-headline">Vendedor no encontrado</h1>
+              <h1 className="text-3xl font-bold tracking-tight mb-4 font-headline">Vendedor no encontrado o sin productos</h1>
               <p className="text-muted-foreground mt-2 max-w-md">
-                No pudimos encontrar al vendedor "{vendorName}". Puede que el enlace esté mal o que ya no forme parte de nuestra comunidad.
+                No pudimos encontrar productos para "{vendorName}". Puede que el enlace esté mal o que el vendedor aún no haya publicado nada.
               </p>
               <Button asChild className="mt-6">
                 <Link href="/">Volver a la tienda principal</Link>
@@ -47,19 +46,8 @@ export default function VendorPage({ params }: VendorPageProps) {
         <p className="text-muted-foreground mt-2">Explora todos los productos de nuestra tienda.</p>
       </div>
 
-      {vendorProducts.length > 0 ? (
-        <ProductGrid products={vendorProducts} />
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed rounded-lg">
-          <h2 className="text-2xl font-semibold">Esta vidriera está vacía por ahora</h2>
-          <p className="text-muted-foreground mt-2">
-            Este vendedor todavía no ha publicado productos.
-          </p>
-           <Button asChild className="mt-6">
-                <Link href="/">Ver otros productos</Link>
-            </Button>
-        </div>
-      )}
+      <ProductGrid products={vendorProducts} />
+
     </div>
   );
 }

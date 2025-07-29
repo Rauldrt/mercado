@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
-import { products as initialProducts } from "@/lib/products";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Product } from "@/lib/types";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -31,24 +30,32 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
+import { getProductsByVendorId, addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
 
 export default function AdminProductsTable() {
   const { user } = useAuth();
-  // We use the full product list to simulate the "database"
-  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
+  const [vendorProducts, setVendorProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
 
-  const vendorProducts = useMemo(() => {
-    if (!user) return [];
-    return allProducts.filter(p => p.vendorId === user.uid);
-  }, [allProducts, user]);
+  const fetchVendorProducts = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const products = await getProductsByVendorId(user.uid);
+    setVendorProducts(products);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchVendorProducts();
+  }, [fetchVendorProducts]);
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
@@ -60,33 +67,51 @@ export default function AdminProductsTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handleProductSave = (productData: Product) => {
-    // Ensure new products are associated with the current user
-    const productToSave = { ...productData, vendorId: user!.uid };
-
-    if (selectedProduct) {
-      // Edit
-      setAllProducts(prev =>
-        prev.map(p => (p.id === productToSave.id ? productToSave : p))
-      );
-       toast({ title: "Producto Actualizado", description: `"${productToSave.name}" se ha actualizado correctamente.` });
-    } else {
-      // Add
-      setAllProducts(prev => [...prev, productToSave]);
-       toast({ title: "Producto Creado", description: `"${productToSave.name}" se ha añadido a tu tienda.` });
+  const handleProductSave = async (productData: Omit<Product, 'id'> & { id?: string }) => {
+    try {
+      if (productData.id) {
+        // Edit
+        const { id, ...dataToUpdate } = productData;
+        await updateProduct(id, dataToUpdate);
+        toast({ title: "Producto Actualizado", description: `"${dataToUpdate.name}" se ha actualizado correctamente.` });
+      } else {
+        // Add
+        await addProduct(productData as Omit<Product, 'id'>);
+        toast({ title: "Producto Creado", description: `"${productData.name}" se ha añadido a tu tienda.` });
+      }
+      await fetchVendorProducts(); // Refresh list
+    } catch (error) {
+       toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
+       console.error("Failed to save product:", error);
+    } finally {
+        setFormOpen(false);
+        setSelectedProduct(null);
     }
-    setFormOpen(false);
-    setSelectedProduct(null);
   };
 
-  const handleDeleteProduct = () => {
+  const handleDeleteProduct = async () => {
     if (selectedProduct) {
-      setAllProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
-      toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
+       try {
+            await deleteProduct(selectedProduct.id);
+            toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
+            await fetchVendorProducts(); // Refresh list
+       } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
+            console.error("Failed to delete product:", error);
+       } finally {
+            setDeleteAlertOpen(false);
+            setSelectedProduct(null);
+       }
     }
-    setDeleteAlertOpen(false);
-    setSelectedProduct(null);
   };
+  
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div>

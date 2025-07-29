@@ -3,17 +3,13 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { Loader2 } from 'lucide-react';
 
-// Mock User Type
-interface MockUser {
-  uid: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
-}
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: User | null;
   loading: boolean;
   signIn: () => void;
   logout: () => void;
@@ -29,61 +25,53 @@ export const useAuth = () => {
   return context;
 };
 
-// Mock user data
-const mockUser: MockUser = {
-  uid: 'admin-user-01',
-  email: 'admin@ndera.store',
-  displayName: 'Admin Ndera',
-  photoURL: 'https://placehold.co/100x100.png'
-};
-
-const AUTH_STORAGE_KEY = 'ndera_store_auth';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  const signIn = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (storedAuth) {
-        setUser(JSON.parse(storedAuth));
-      }
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.push('/admin');
     } catch (error) {
-      console.error("Failed to parse auth state from localStorage", error);
-      setUser(null);
+      console.error("Error during sign-in:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
-  const signIn = useCallback(() => {
+  const logout = useCallback(async () => {
     setLoading(true);
     try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mockUser));
-        setUser(mockUser);
-        router.push('/admin');
+      await firebaseSignOut(auth);
+      router.push('/');
     } catch (error) {
-        console.error("Failed to save auth state to localStorage", error);
+      console.error("Error during sign-out:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   }, [router]);
 
-  const logout = useCallback(() => {
-    setLoading(true);
-    try {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        setUser(null);
-        router.push('/');
-    } catch (error) {
-         console.error("Failed to remove auth state from localStorage", error);
-    } finally {
-        setLoading(false);
-    }
-  }, [router]);
+  if (loading) {
+     return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   const value = {
     user,

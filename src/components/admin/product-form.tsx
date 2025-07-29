@@ -21,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'El nombre debe tener al menos 3 caracteres.' }),
@@ -39,7 +38,7 @@ const formSchema = z.object({
 
 interface ProductFormProps {
   product?: Product | null;
-  onSave: (product: Omit<Product, 'vendorId'> & { vendorId?: string }) => void;
+  onSave: (product: Omit<Product, 'id'> & { id?: string }) => void;
   onCancel: () => void;
 }
 
@@ -83,10 +82,14 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+        console.error("No user found, cannot save product.");
+        return;
+    }
     const finalProduct = {
-      id: product?.id || uuidv4(),
+      id: product?.id,
       ...values,
-      vendorId: user!.uid,
+      vendorId: user.uid,
       imageUrls: values.imageUrls.map(url => url.value),
       specifications: specsToObject(values.specifications),
     };

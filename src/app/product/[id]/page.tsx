@@ -1,5 +1,6 @@
+
 import { notFound } from 'next/navigation';
-import { getProductById, products } from '@/lib/products';
+import { getProductById, getProducts } from '@/lib/firebase';
 import ProductView from '@/components/products/product-view';
 import ProductRecommendations from '@/components/products/product-recommendations';
 import { Suspense } from 'react';
@@ -32,6 +33,7 @@ async function getRecommendations(currentProduct: Product) {
   const userHistory = `El usuario está viendo el producto "${currentProduct.name}". Recientemente ha visto "Zapatillas Urbanas" y tiene un "Mate Imperial" en su carrito.`;
 
   let recommendedProducts: Product[] = [];
+  const allProducts = await getProducts();
 
   try {
     const recommendationsResult = await personalizedProductRecommendations({ userHistory });
@@ -39,21 +41,21 @@ async function getRecommendations(currentProduct: Product) {
     const recommendedProductNames = recommendationsResult.recommendations;
     
     recommendedProducts = recommendedProductNames
-        .map(name => products.find(p => p.name.toLowerCase() === name.toLowerCase()))
+        .map(name => allProducts.find(p => p.name.toLowerCase() === name.toLowerCase()))
         .filter((p): p is Product => p !== undefined && p.id !== currentProduct.id)
         .slice(0, 3);
 
   } catch (error) {
     console.error("Error fetching AI recommendations:", error);
     // Fallback to showing products from the same category
-    recommendedProducts = products
+    recommendedProducts = allProducts
         .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
         .slice(0, 3);
   }
   
   // If still no products (e.g., category had only one item), show some random ones
   if (recommendedProducts.length === 0) {
-     recommendedProducts = [...products]
+     recommendedProducts = [...allProducts]
         .sort(() => 0.5 - Math.random())
         .filter(p => p.id !== currentProduct.id)
         .slice(0, 3);
@@ -63,7 +65,7 @@ async function getRecommendations(currentProduct: Product) {
 
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = getProductById(params.id);
+  const product = await getProductById(params.id);
 
   if (!product) {
     notFound();
