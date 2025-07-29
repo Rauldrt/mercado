@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -40,17 +40,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = useCallback(async () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({
-        'auth_domain': auth.config.authDomain
-    });
     try {
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle user state update. 
-      // Successful sign-in will trigger the useEffect in ProtectedRoute or LoginPage to redirect.
+      // onAuthStateChanged will handle user state update and redirect.
     } catch (error) {
       console.error("Error signing in with Google", error);
-    } finally {
-      // setLoading will be updated by onAuthStateChanged listener
+      setLoading(false); // Ensure loading is false on error
     }
   }, []);
 
