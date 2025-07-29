@@ -45,11 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // Let the onAuthStateChanged listener handle the user state and routing
+      // onAuthStateChanged will handle the user state update
     } catch (error) {
       console.error("Error during sign-in:", error);
-      // Optionally, show a toast to the user
-      setLoading(false);
+      setLoading(false); // Ensure loading is turned off on error
     }
   }, []);
 
@@ -62,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router]);
 
-  if (loading && user === null) {
+  if (loading) {
      return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
