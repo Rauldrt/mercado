@@ -6,16 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AdminProductsTable from "@/components/admin/products-table";
 import AdminCustomersTable from "@/components/admin/customers-table";
 import AdminPromotionsTable from "@/components/admin/promotions-table";
+import AdminSettings from "@/components/admin/admin-settings";
 
 function AdminDashboard() {
   return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Panel de Administración</h1>
         <Tabs defaultValue="products">
-          <TabsList className="grid w-full grid-cols-3 md:w-[600px]">
+          <TabsList className="grid w-full grid-cols-4 md:w-[800px]">
             <TabsTrigger value="products">Productos</TabsTrigger>
             <TabsTrigger value="customers">Clientes</TabsTrigger>
             <TabsTrigger value="promotions">Promociones</TabsTrigger>
+            <TabsTrigger value="settings">Configuración</TabsTrigger>
           </TabsList>
           <TabsContent value="products">
             <Card>
@@ -53,6 +55,19 @@ function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <AdminPromotionsTable />
+              </CardContent>
+            </Card>
+          </TabsContent>
+           <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración del Sitio</CardTitle>
+                <CardDescription>
+                  Gestiona las configuraciones globales de tu tienda.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminSettings />
               </CardContent>
             </Card>
           </TabsContent>

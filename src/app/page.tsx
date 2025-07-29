@@ -10,7 +10,7 @@ import { Filter, Loader2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import CategoryCarousel from '@/components/products/category-carousel';
 import PromotionsCard from '@/components/products/promotions-card';
-import { getProducts } from '@/lib/firebase';
+import { getProducts, getSetting } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -21,19 +21,26 @@ function PromotionCardFallback() {
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subtitle, setSubtitle] = useState("Explora los productos y servicios de tu comunidad");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [isSheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsAndSettings = async () => {
       setLoading(true);
-      const products = await getProducts();
+      const [products, fetchedSubtitle] = await Promise.all([
+        getProducts(),
+        getSetting('homepageSubtitle')
+      ]);
       setAllProducts(products);
+      if (fetchedSubtitle) {
+        setSubtitle(fetchedSubtitle);
+      }
       setLoading(false);
     };
-    fetchProducts();
+    fetchProductsAndSettings();
   }, []);
 
   const categories = useMemo(() => {
@@ -89,7 +96,7 @@ export default function Home() {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Ndera-Store</h1>
-        <p className="text-muted-foreground mt-2">Explora los productos y servicios de tu comunidad</p>
+        <p className="text-muted-foreground mt-2">{subtitle}</p>
       </div>
 
       <div className="mb-12">

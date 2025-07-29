@@ -1,6 +1,6 @@
 
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import type { Product, Promotion, Customer } from './types';
 
@@ -22,6 +22,7 @@ const auth = getAuth(app);
 const productsCollection = collection(db, 'products');
 const promotionsCollection = collection(db, 'promotions');
 const customersCollection = collection(db, 'customers');
+const settingsCollection = collection(db, 'settings');
 
 // Helper to convert Firestore doc to a given type
 const docToType = <T>(doc: any): T => {
@@ -126,6 +127,23 @@ export const updateCustomer = async (id: string, customerUpdate: Partial<Omit<Cu
 export const deleteCustomer = async (id: string): Promise<void> => {
     const docRef = doc(db, 'customers', id);
     await deleteDoc(docRef);
+}
+
+
+// Settings Operations
+export const getSetting = async (settingId: string): Promise<string | null> => {
+    const docRef = doc(db, 'settings', settingId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return docSnap.data().value;
+    }
+    return null;
+}
+
+export const updateSetting = async (settingId: string, value: string): Promise<void> => {
+    const docRef = doc(db, 'settings', settingId);
+    // Use setDoc with merge: true to create the document if it doesn't exist, or update it if it does.
+    await setDoc(docRef, { value }, { merge: true });
 }
 
 
