@@ -2,10 +2,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useAuth } from '@/contexts/auth-context';
 
 export default function Footer() {
-  const { user } = useAuth();
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-8">
@@ -19,9 +17,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="hover:underline">Inicio</Link></li>
               <li><Link href="/#products" className="hover:underline">Productos</Link></li>
-              {user && (
-                <li><Link href="/admin" className="hover:underline">Administrador</Link></li>
-              )}
+              <li><Link href="/admin" className="hover:underline">Administrador</Link></li>
             </ul>
           </div>
           <div>
