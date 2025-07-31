@@ -98,9 +98,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-             <Button asChild>
-                <Link href="/login">Ingresar</Link>
-             </Button>
+             null
           )}
 
           <div className="md:hidden">
