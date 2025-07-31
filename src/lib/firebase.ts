@@ -4,6 +4,7 @@ import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, dele
 import { getAuth } from "firebase/auth";
 import type { Product, Promotion, Customer } from './types';
 
+
 const firebaseConfig = {
   projectId: "ndera-store",
   appId: "1:986534409565:web:2267108c210a31c98364b4",
