@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/auth-context';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -56,7 +55,6 @@ const specsToObject = (specs: { key: string; value: string }[]) => {
 };
 
 export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
-  const { user } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,17 +80,11 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
-      // This should ideally not happen if the form is protected
-      alert("Debes iniciar sesión para guardar un producto.");
-      return;
-    }
-
     const finalProduct = {
       id: product?.id,
       ...values,
-      vendor: user.displayName || 'Vendedor Anónimo',
-      vendorId: user.uid,
+      vendor: 'Tienda Principal', // Assign a default vendor
+      vendorId: 'admin', // Assign a default vendorId
       imageUrls: values.imageUrls.map(url => url.value),
       specifications: specsToObject(values.specifications),
     };

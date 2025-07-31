@@ -1,9 +1,8 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Product } from "@/lib/types";
-import { useAuth } from "@/contexts/auth-context";
 import {
   Table,
   TableBody,
@@ -34,37 +33,32 @@ import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2, Copy } from "lucid
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
-import { addProduct, updateProduct, deleteProduct, getProductsByVendorId } from "@/lib/firebase";
+import { addProduct, updateProduct, deleteProduct, getProducts } from "@/lib/firebase";
 
 export default function AdminProductsTable() {
-  const { user } = useAuth();
-  const [vendorProducts, setVendorProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchVendorProducts = useCallback(async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const products = await getProductsByVendorId(user.uid);
-      setVendorProducts(products);
+      const products = await getProducts();
+      setAllProducts(products);
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar tus productos." });
+      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los productos." });
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [toast]);
 
   useEffect(() => {
-    fetchVendorProducts();
-  }, [fetchVendorProducts]);
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
@@ -78,18 +72,25 @@ export default function AdminProductsTable() {
 
   const handleProductSave = async (productData: Omit<Product, 'id'> & { id?: string }) => {
     try {
-      if (productData.id) {
+      // Add vendor info if a user is "logged in" (even if simulated)
+      const finalProductData = {
+          ...productData,
+          vendor: 'Tienda Principal',
+          vendorId: 'admin'
+      }
+
+      if (finalProductData.id) {
         // Edit
-        const { id, ...dataToUpdate } = productData;
+        const { id, ...dataToUpdate } = finalProductData;
         await updateProduct(id, dataToUpdate);
         toast({ title: "Producto Actualizado", description: `"${dataToUpdate.name}" se ha actualizado correctamente.` });
       } else {
         // Add
-        const { id, ...dataToAdd } = productData; // Destructure to remove id
+        const { id, ...dataToAdd } = finalProductData; // Destructure to remove id
         await addProduct(dataToAdd);
-        toast({ title: "Producto Creado", description: `"${productData.name}" se ha añadido a tu tienda.` });
+        toast({ title: "Producto Creado", description: `"${finalProductData.name}" se ha añadido a tu tienda.` });
       }
-      await fetchVendorProducts(); // Refresh list
+      await fetchProducts(); // Refresh list
     } catch (error) {
        toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
        console.error("Failed to save product:", error);
@@ -104,7 +105,7 @@ export default function AdminProductsTable() {
        try {
             await deleteProduct(selectedProduct.id);
             toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
-            await fetchVendorProducts(); // Refresh list
+            await fetchProducts(); // Refresh list
        } catch (error) {
             toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
             console.error("Failed to delete product:", error);
@@ -131,14 +132,6 @@ export default function AdminProductsTable() {
     );
   }
 
-  if (!user) {
-    return (
-        <div className="text-center py-10">
-            <p>Por favor, inicia sesión para ver tus productos.</p>
-        </div>
-    )
-  }
-
   return (
     <div>
       <div className="flex justify-end mb-4">
@@ -163,7 +156,7 @@ export default function AdminProductsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {vendorProducts.map((product) => (
+            {allProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="hidden sm:table-cell">
                   <Image
@@ -256,5 +249,3 @@ export default function AdminProductsTable() {
     </div>
   );
 }
-
-    
