@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, LogOut, Shield } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Shield, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainNav from '@/components/layout/main-nav';
 import { useCart } from '@/contexts/cart-context';
@@ -98,7 +98,12 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-             null
+             <Button asChild variant="ghost">
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Ingresar
+                </Link>
+             </Button>
           )}
 
           <div className="md:hidden">
