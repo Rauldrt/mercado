@@ -2,11 +2,17 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import { app } from '@/lib/firebase'; // Import the initialized app
+
+
+const auth = getAuth(app);
 
 interface AuthContextType {
   user: User | null;
   isAuthenticating: boolean;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -23,29 +29,37 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
-  
-  // This is a mock implementation. In a real app, you'd integrate
-  // with Firebase Auth. For now, we'll simulate a logged-in user.
-  useEffect(() => {
-    const mockUser = {
-      uid: 'mock-user-id',
-      email: 'admin@mercadoargentino.online',
-      displayName: 'Admin',
-      photoURL: null
-    } as User;
 
-    setUser(mockUser);
-    setIsAuthenticating(false);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(currentUser => {
+      setUser(currentUser);
+      setIsAuthenticating(false);
+    });
+    return () => unsubscribe();
   }, []);
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      setIsAuthenticating(true);
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in with Google", error);
+    }
+  };
+
   const signOut = async () => {
-    // In a real app, this would call Firebase's signOut
-    setUser(null);
+    try {
+        await firebaseSignOut(auth);
+    } catch (error) {
+        console.error("Error signing out", error);
+    }
   };
 
   const value = {
     user,
     isAuthenticating,
+    signInWithGoogle,
     signOut,
   };
 

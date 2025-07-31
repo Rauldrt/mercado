@@ -67,7 +67,7 @@ export default function Header() {
           
           {isAuthenticating ? (
             <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
-          ) : user && (
+          ) : user ? (
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -97,6 +97,10 @@ export default function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <Button asChild variant="outline">
+                <Link href="/login">Ingresar</Link>
+            </Button>
           )}
 
           <div className="md:hidden">
