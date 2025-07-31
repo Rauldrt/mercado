@@ -4,16 +4,20 @@
 import { type ReactNode } from 'react';
 import { CartProvider } from '@/contexts/cart-context';
 import { WishlistProvider } from '@/contexts/wishlist-context';
-// import { AuthProvider } from '@/contexts/auth-context'; // AuthProvider is removed
+import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from "@/components/ui/toaster";
+import { CartSheet } from './cart/cart-sheet';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
+    <AuthProvider>
       <WishlistProvider>
         <CartProvider>
           {children}
           <Toaster />
+          <CartSheet />
         </CartProvider>
       </WishlistProvider>
+    </AuthProvider>
   );
 }

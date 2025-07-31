@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -5,6 +6,8 @@ import type { Product, CartItem } from '@/lib/types';
 
 interface CartContextType {
   cartItems: CartItem[];
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -26,6 +29,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -58,6 +62,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prevItems, { product, quantity }];
     });
+    setIsCartOpen(true);
   }, []);
 
   const removeFromCart = useCallback((productId: string) => {
@@ -96,6 +101,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     cartItems,
+    isCartOpen,
+    setIsCartOpen,
     addToCart,
     removeFromCart,
     updateQuantity,

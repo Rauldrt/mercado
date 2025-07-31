@@ -20,6 +20,7 @@ export type CartItem = {
 
 export type Customer = {
   id: string;
+  userId?: string; // Link to Firebase Auth user
   firstName: string;
   lastName: string;
   email: string;

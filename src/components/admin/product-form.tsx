@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
-// import { useAuth } from '@/contexts/auth-context'; // Auth removed
+import { useAuth } from '@/contexts/auth-context';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,13 +33,12 @@ const formSchema = z.object({
     key: z.string().min(1, 'La clave no puede estar vacía.'),
     value: z.string().min(1, 'El valor no puede estar vacío.'),
   })),
-  vendor: z.string().min(2, { message: 'El nombre del vendedor es requerido.'}),
   promotionTag: z.string().optional(),
 });
 
 interface ProductFormProps {
   product?: Product | null;
-  onSave: (product: Omit<Product, 'id'> & { id?: string }) => void;
+  onSave: (product: Omit<Product, 'id' | 'vendor' | 'vendorId'> & { id?: string }) => void;
   onCancel: () => void;
 }
 
@@ -56,11 +55,8 @@ const specsToObject = (specs: { key: string; value: string }[]) => {
   }, {} as Record<string, string>);
 };
 
-const MOCK_ADMIN_USER_ID = "admin_user_id";
-const MOCK_ADMIN_DISPLAY_NAME = "Admin Store";
-
 export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
-  // const { user } = useAuth(); // Auth removed
+  const { user } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,7 +67,6 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       stock: product?.stock || 0,
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
-      vendor: product?.vendor || MOCK_ADMIN_DISPLAY_NAME,
       promotionTag: product?.promotionTag || '',
     },
   });
@@ -87,10 +82,17 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      // This should ideally not happen if the form is protected
+      alert("Debes iniciar sesión para guardar un producto.");
+      return;
+    }
+
     const finalProduct = {
       id: product?.id,
       ...values,
-      vendorId: MOCK_ADMIN_USER_ID, // Use mock admin ID
+      vendor: user.displayName || 'Vendedor Anónimo',
+      vendorId: user.uid,
       imageUrls: values.imageUrls.map(url => url.value),
       specifications: specsToObject(values.specifications),
     };
@@ -160,33 +162,21 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
           />
         </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="vendor"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Vendedor/Tienda</FormLabel>
-                  <FormControl><Input placeholder="Mi Tienda" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="promotionTag"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Etiqueta de Promoción (Opcional)</FormLabel>
-                  <FormControl><Input placeholder="25% OFF" {...field} /></FormControl>
-                   <FormDescription>
-                    Este texto aparecerá como una insignia sobre la imagen del producto.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-        </div>
+        
+        <FormField
+          control={form.control}
+          name="promotionTag"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Etiqueta de Promoción (Opcional)</FormLabel>
+              <FormControl><Input placeholder="25% OFF" {...field} /></FormControl>
+                <FormDescription>
+                Este texto aparecerá como una insignia sobre la imagen del producto.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         {/* Image URLs */}
         <div className="space-y-4 rounded-md border p-4">

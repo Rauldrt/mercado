@@ -2,6 +2,7 @@
 "use client";
 
 import { useCart } from '@/contexts/cart-context';
+import { useAuth } from '@/contexts/auth-context';
 import CheckoutForm from '@/components/checkout/checkout-form';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -20,6 +21,7 @@ import type { checkoutFormSchema } from '@/components/checkout/checkout-form';
 
 export default function CheckoutPage() {
   const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
+  const { user } = useAuth();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<z.infer<typeof checkoutFormSchema> | null>(null);
   
@@ -42,11 +44,12 @@ export default function CheckoutPage() {
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
     setCustomerInfo(data);
 
-    if (data.createAccount) {
+    if (data.createAccount || user) {
       const newCustomer: Omit<Customer, 'id'> = {
+        userId: user?.uid,
         firstName: data.firstName,
         lastName: data.lastName,
-        email: data.email,
+        email: user?.email || data.email,
         address: data.address,
         city: data.city,
         zip: data.zip,
@@ -134,8 +137,8 @@ export default function CheckoutPage() {
                     <path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z" />
                   </svg>
                   <div>
-                      <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>Ndera-Store</h1>
-                      <p style={{ margin: '0' }}>soporte@ndera.store</p>
+                      <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>Mercado Argentino Online</h1>
+                      <p style={{ margin: '0' }}>soporte@mercadoargentino.online</p>
                   </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -149,7 +152,7 @@ export default function CheckoutPage() {
                   <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>Datos del Cliente:</h3>
                   <p style={{ margin: '0' }}><strong>Nombre:</strong> {customerInfo.firstName} {customerInfo.lastName}</p>
                   <p style={{ margin: '0' }}><strong>Dirección:</strong> {customerInfo.address}, {customerInfo.city}, {customerInfo.zip}</p>
-                  <p style={{ margin: '0' }}><strong>Email:</strong> {customerInfo.email}</p>
+                  <p style={{ margin: '0' }}><strong>Email:</strong> {user?.email || customerInfo.email}</p>
               </div>
           )}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>

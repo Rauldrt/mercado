@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Product } from "@/lib/types";
-// import { useAuth } from "@/contexts/auth-context"; // Auth removed
+import { useAuth } from "@/contexts/auth-context";
 import {
   Table,
   TableBody,
@@ -34,12 +34,10 @@ import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2, Copy } from "lucid
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
-import { addProduct, updateProduct, deleteProduct, getProducts } from "@/lib/firebase";
-
-const MOCK_ADMIN_USER_ID = "admin_user_id";
+import { addProduct, updateProduct, deleteProduct, getProductsByVendorId } from "@/lib/firebase";
 
 export default function AdminProductsTable() {
-  // const { user } = useAuth(); // Auth removed
+  const { user } = useAuth();
   const [vendorProducts, setVendorProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -48,18 +46,21 @@ export default function AdminProductsTable() {
   const { toast } = useToast();
 
   const fetchVendorProducts = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      // Fetch all products since there's no logged-in user
-      const products = await getProducts();
+      const products = await getProductsByVendorId(user.uid);
       setVendorProducts(products);
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los productos." });
+      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar tus productos." });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     fetchVendorProducts();
@@ -128,6 +129,14 @@ export default function AdminProductsTable() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     );
+  }
+
+  if (!user) {
+    return (
+        <div className="text-center py-10">
+            <p>Por favor, inicia sesión para ver tus productos.</p>
+        </div>
+    )
   }
 
   return (

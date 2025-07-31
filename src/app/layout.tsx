@@ -6,9 +6,13 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import MobileFabMenu from '@/components/layout/mobile-fab-menu';
 import '@/lib/firebase'; // Ensure Firebase is initialized
+import { Inter, Oswald } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], variable: '--font-oswald' });
 
 export const metadata: Metadata = {
-  title: 'Ndera-Store',
+  title: 'Mercado Argentino Online',
   description: 'Tu vidriera digital para potenciar el comercio local.',
   manifest: '/manifest.webmanifest',
 };
@@ -19,15 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${oswald.variable}`}>
       <body className="font-body antialiased">
         <Providers>
             <div className="flex min-h-screen flex-col">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -15,16 +16,11 @@ import CartItem from './cart-item';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
-interface CartSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function CartSheet({ open, onOpenChange }: CartSheetProps) {
-  const { cartItems, totalPrice, clearCart, cartCount } = useCart();
+export function CartSheet() {
+  const { cartItems, totalPrice, clearCart, cartCount, isCartOpen, setIsCartOpen } = useCart();
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="px-6">
           <SheetTitle>Carrito de Compras ({cartCount})</SheetTitle>
@@ -49,7 +45,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 <span>${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
               </div>
               <div className="flex flex-col gap-2">
-                <Button asChild size="lg" onClick={() => onOpenChange(false)}>
+                <Button asChild size="lg" onClick={() => setIsCartOpen(false)}>
                   <Link href="/checkout">Finalizar Compra</Link>
                 </Button>
                 <Button variant="outline" onClick={clearCart}>
@@ -64,7 +60,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
             <p className="text-muted-foreground">
               Parece que todavía no has agregado nada.
             </p>
-            <Button asChild onClick={() => onOpenChange(false)}>
+            <Button asChild onClick={() => setIsCartOpen(false)}>
                 <Link href="/">Seguir comprando</Link>
             </Button>
           </div>
