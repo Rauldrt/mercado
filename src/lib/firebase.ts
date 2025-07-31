@@ -5,11 +5,11 @@ import { getAuth } from "firebase/auth";
 import type { Product, Promotion, Customer } from './types';
 
 const firebaseConfig = {
-  projectId: "mercado-argentino-online",
+  projectId: "ndera-store",
   appId: "1:986534409565:web:2267108c210a31c98364b4",
-  storageBucket: "mercado-argentino-online.firebasestorage.app",
+  storageBucket: "ndera-store.firebasestorage.app",
   apiKey: "AIzaSyBHbCbynS3EIcHcU6Ib_iVEcNSh-K4rJDQ",
-  authDomain: "mercado-argentino-online.firebaseapp.com",
+  authDomain: "ndera-store.firebaseapp.com",
   measurementId: "",
   messagingSenderId: "986534409565",
 };
