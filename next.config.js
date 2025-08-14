@@ -34,6 +34,12 @@ const nextConfig = {
         hostname: 'jdesblog.s3.eu-west-1.amazonaws.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'dcdn-us.mitiendanube.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
