@@ -7,8 +7,33 @@ import AdminProductsTable from "@/components/admin/products-table";
 import AdminCustomersTable from "@/components/admin/customers-table";
 import AdminPromotionsTable from "@/components/admin/promotions-table";
 import AdminSettings from "@/components/admin/admin-settings";
+import { useAuth } from '@/contexts/auth-context';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 function AdminDashboard() {
+  const { user, isAuthenticating } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticating && !user) {
+      router.push('/login');
+    }
+  }, [user, isAuthenticating, router]);
+
+  if (isAuthenticating || !user) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <p className="mt-4 text-muted-foreground">Verificando tu sesión...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Panel de Administración</h1>
