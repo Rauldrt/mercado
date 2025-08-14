@@ -1,0 +1,16 @@
+{
+  "node": {
+    "4046260a6a130217b41baf5f5b2be49f94254586f3": {
+      "workers": {
+        "app/product/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/product/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/product-recommendations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/product/[id]/page": "rsc"
+      }
+    }
+  },
+  "edge": {}
+}
