@@ -15,18 +15,18 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-const loginFormSchema = z.object({
+const registerFormSchema = z.object({
   email: z.string().email({ message: 'Por favor, ingrese un email válido.' }),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' }),
 });
 
-export default function LoginPage() {
-  const { user, signInWithEmail, isAuthenticating } = useAuth();
+export default function RegisterPage() {
+  const { user, signUpWithEmail, isAuthenticating } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: { email: '', password: '' },
   });
 
@@ -36,20 +36,28 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
     try {
-      await signInWithEmail(values.email, values.password);
+      await signUpWithEmail(values.email, values.password);
+      toast({
+        title: "¡Registro exitoso!",
+        description: "Tu cuenta de administrador ha sido creada. Serás redirigido.",
+      });
       // The useEffect will handle the redirect on user state change
     } catch (error: any) {
-      console.error("Error signing in", error);
+      console.error("Error signing up", error);
+      let description = "Ocurrió un error. Por favor, intente de nuevo.";
+      if (error.code === 'auth/email-already-in-use') {
+        description = "Este email ya está en uso. Por favor, intenta con otro.";
+      }
       toast({
         variant: "destructive",
-        title: "Error de inicio de sesión",
-        description: "El email o la contraseña son incorrectos. Por favor, intente de nuevo.",
+        title: "Error de registro",
+        description,
       });
     }
   };
-
+  
   if (isAuthenticating || user) {
     return (
         <div className="flex justify-center items-center min-h-[80vh]">
@@ -62,9 +70,9 @@ export default function LoginPage() {
     <div className="flex justify-center items-center min-h-[80vh] bg-secondary/50 px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Acceso Administrador</CardTitle>
+          <CardTitle className="text-2xl font-headline">Crear Cuenta de Administrador</CardTitle>
           <CardDescription>
-            Inicia sesión con tu email y contraseña.
+            Completa el formulario para registrarte.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,15 +101,15 @@ export default function LoginPage() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Ingresar
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Registrarse
               </Button>
             </form>
           </Form>
-           <p className="mt-4 text-center text-sm text-muted-foreground">
-            ¿No tienes una cuenta?{' '}
-            <Link href="/register" className="underline hover:text-primary">
-              Regístrate aquí
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            ¿Ya tienes una cuenta?{' '}
+            <Link href="/login" className="underline hover:text-primary">
+              Inicia sesión aquí
             </Link>
           </p>
         </CardContent>
