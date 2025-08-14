@@ -6,13 +6,13 @@ import type { Product, Promotion, Customer } from './types';
 
 
 const firebaseConfig = {
-  projectId: "ndera-store",
-  appId: "1:986534409565:web:2267108c210a31c98364b4",
-  storageBucket: "ndera-store.firebasestorage.app",
-  apiKey: "AIzaSyBHbCbynS3EIcHcU6Ib_iVEcNSh-K4rJDQ",
-  authDomain: "ndera-store.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   measurementId: "",
-  messagingSenderId: "986534409565",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
