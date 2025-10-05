@@ -4,18 +4,25 @@
 import AdminProductsTable from "@/components/admin/products-table";
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from "lucide-react";
+import ProductCsvImporter from "@/components/admin/product-csv-importer";
 
 function AdminCatalogPage() {
   const { user, isAuthenticating } = useAuth();
   const router = useRouter();
+  const [tableKey, setTableKey] = useState(Date.now()); // State to force re-render
 
   useEffect(() => {
     if (!isAuthenticating && !user) {
       router.push('/login');
     }
   }, [user, isAuthenticating, router]);
+
+  const handleImportSuccess = () => {
+    // Update the key to force AdminProductsTable to re-fetch products
+    setTableKey(Date.now());
+  };
 
   if (isAuthenticating || !user) {
     return (
@@ -32,9 +39,10 @@ function AdminCatalogPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
             <h1 className="text-3xl font-bold tracking-tight font-headline">Gestión de Catálogo</h1>
-            <p className="text-muted-foreground">Añade, edita o elimina productos de tu catálogo general.</p>
+            <p className="text-muted-foreground">Añade, edita, elimina o importa masivamente productos de tu catálogo.</p>
         </div>
-        <AdminProductsTable />
+        <ProductCsvImporter onImportSuccess={handleImportSuccess} />
+        <AdminProductsTable key={tableKey} />
       </div>
   )
 }
