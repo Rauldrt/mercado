@@ -4,9 +4,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
-// Note: We are keeping the component client-side for now to avoid complexity,
-// but category fetching could be moved to the server.
 
 interface MainNavProps {
   vertical?: boolean;
@@ -25,7 +22,7 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
 
   const linkClass = (href: string) => cn(
     "text-sm font-medium transition-colors hover:text-primary",
-    pathname === href ? "text-primary" : "text-muted-foreground",
+    pathname.startsWith(href) ? "text-primary" : "text-muted-foreground",
   );
 
   const handleLinkClick = () => {
@@ -39,7 +36,10 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
       <Link href="/" className={linkClass("/")} onClick={handleLinkClick}>
         Inicio
       </Link>
-      <Link href="/#products" className={linkClass("/#products")} onClick={handleLinkClick}>
+      <Link href="/admin/customers" className={linkClass("/admin/customers")} onClick={handleLinkClick}>
+        Clientes
+      </Link>
+      <Link href="/admin/products" className={linkClass("/admin/products")} onClick={handleLinkClick}>
         Productos
       </Link>
     </nav>

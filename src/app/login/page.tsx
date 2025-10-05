@@ -32,7 +32,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/admin');
+      router.push('/');
     }
   }, [user, router]);
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
     <div className="flex justify-center items-center min-h-[80vh] bg-secondary/50 px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Acceso Administrador</CardTitle>
+          <CardTitle className="text-2xl font-headline">Acceso Preventista</CardTitle>
           <CardDescription>
             Inicia sesión con tu email y contraseña.
           </CardDescription>
@@ -76,7 +76,7 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
-                    <FormControl><Input type="email" placeholder="admin@tienda.com" {...field} /></FormControl>
+                    <FormControl><Input type="email" placeholder="vendedor@email.com" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

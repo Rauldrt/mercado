@@ -1,174 +1,73 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import ProductGrid from '@/components/products/product-grid';
-import ProductFilters from '@/components/products/product-filters';
-import type { Product } from '@/lib/types';
-import { Button } from '@/components/ui/button';
-import { Filter, Loader2 } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import CategoryCarousel from '@/components/products/category-carousel';
-import PromotionsCard from '@/components/products/promotions-card';
-import { getProducts, getSetting } from '@/lib/firebase';
-import { Skeleton } from '@/components/ui/skeleton';
-
-
-function PromotionCardFallback() {
-  return <Skeleton className="w-full h-[250px] md:h-[400px]" />
-}
+import { useAuth } from '@/contexts/auth-context';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Loader2, Users, FilePlus } from "lucide-react";
+import Link from 'next/link';
 
 function HomePageContent() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [subtitle, setSubtitle] = useState("Explora los productos y servicios de tu comunidad");
-  const searchParams = useSearchParams();
-  const initialSearchQuery = searchParams.get('q') || '';
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [priceRange, setPriceRange] = useState([0, 1000000]);
-  const [isSheetOpen, setSheetOpen] = useState(false);
+    const { user, isAuthenticating } = useAuth();
+    const router = useRouter();
 
-  useEffect(() => {
-    setSearchQuery(initialSearchQuery);
-  }, [initialSearchQuery]);
+    useEffect(() => {
+        if (!isAuthenticating && !user) {
+            router.push('/login');
+        }
+    }, [user, isAuthenticating, router]);
 
-  useEffect(() => {
-    const fetchProductsAndSettings = async () => {
-      setLoading(true);
-      const [products, fetchedSubtitle] = await Promise.all([
-        getProducts(),
-        getSetting('homepageSubtitle')
-      ]);
-      setAllProducts(products);
-      if (fetchedSubtitle) {
-        setSubtitle(fetchedSubtitle);
-      }
-      setLoading(false);
-    };
-    fetchProductsAndSettings();
-  }, []);
-
-  const categories = useMemo(() => {
-    const allCategories = allProducts.map(p => p.category);
-    return ['all', ...Array.from(new Set(allCategories))];
-  }, [allProducts]);
-
-  const carouselCategories = useMemo(() => {
-    return categories.filter(c => c !== 'all');
-  }, [categories]);
-
-  const filteredProducts = useMemo(() => {
-    return allProducts.filter(product => {
-      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-      const matchesSearch = 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.vendor.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesCategory && matchesPrice && matchesSearch;
-    });
-  }, [searchQuery, selectedCategory, priceRange, allProducts]);
-  
-  const handleCategorySelect = (category: string) => {
-    if (selectedCategory === category) {
-      setSelectedCategory('all'); // Toggle off if the same category is clicked
-    } else {
-      setSelectedCategory(category);
+    if (isAuthenticating || !user) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <div className="text-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+                    <p className="mt-4 text-muted-foreground">Verificando tu sesión...</p>
+                </div>
+            </div>
+        )
     }
-  };
 
-  const handleFilterCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    if(isSheetOpen) {
-      setSheetOpen(false);
-    }
-  }
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <div className="text-center mb-12">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Panel de Preventista</h1>
+                <p className="text-muted-foreground mt-2">Bienvenido, {user.email}. Gestiona tus clientes y pedidos desde aquí.</p>
+            </div>
 
-  const filtersComponent = (
-      <ProductFilters
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleFilterCategoryChange}
-        priceRange={priceRange}
-        onPriceChange={setPriceRange}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-  );
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">Mercado Argentino Online</h1>
-        <p className="text-muted-foreground mt-2">{subtitle}</p>
-      </div>
-
-      <div className="mb-12">
-        <Suspense fallback={<PromotionCardFallback />}>
-          <PromotionsCard />
-        </Suspense>
-      </div>
-
-      <div className="mb-12">
-        <CategoryCarousel 
-          categories={carouselCategories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
-        />
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold tracking-tight font-headline">
-          {searchQuery ? `Resultados para "${searchQuery}"` : (selectedCategory === 'all' ? 'Todos los Productos' : selectedCategory)}
-        </h2>
-        <div className="flex items-center gap-4">
-            <p className="text-sm text-muted-foreground hidden sm:block">{filteredProducts.length} resultados</p>
-             <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="outline">
-                        <Filter className="mr-2 h-4 w-4" />
-                        Filtros
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left">
-                    <SheetHeader>
-                        <SheetTitle className="font-headline">Filtros</SheetTitle>
-                        <SheetDescription>
-                            Ajusta tus preferencias para encontrar el producto perfecto.
-                        </SheetDescription>
-                    </SheetHeader>
-                    <div className="py-4">
-                       {filtersComponent}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                 <Link href="/admin/customers" passHref>
+                    <div className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent cursor-pointer transition-colors">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                                <Users className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold font-headline">Mis Clientes</h2>
+                                <p className="text-muted-foreground text-sm">Ver y gestionar tu cartera de clientes.</p>
+                            </div>
+                        </div>
                     </div>
-                </SheetContent>
-            </Sheet>
+                </Link>
+                <Link href="/admin/products" passHref>
+                     <div className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent cursor-pointer transition-colors">
+                        <div className="flex items-center gap-4">
+                             <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                                <FilePlus className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold font-headline">Cargar Pedido</h2>
+                                <p className="text-muted-foreground text-sm">Crear un nuevo pedido para un cliente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
+            </div>
         </div>
-      </div>
-      
-      {loading ? (
-         <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-         </div>
-      ) : filteredProducts.length > 0 ? (
-        <ProductGrid products={filteredProducts} />
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <h2 className="text-2xl font-semibold">No se encontraron productos</h2>
-          <p className="text-muted-foreground mt-2">Intenta ajustar tu búsqueda o filtros.</p>
-        </div>
-      )}
-    </div>
-  );
+    );
 }
 
-
 export default function Home() {
-  return (
-    <Suspense fallback={<div>Cargando...</div>}>
-      <HomePageContent />
-    </Suspense>
-  )
+    return <HomePageContent />;
 }

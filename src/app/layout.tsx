@@ -12,8 +12,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], variable: '--font-oswald' });
 
 export const metadata: Metadata = {
-  title: 'Mercado Argentino Online',
-  description: 'Tu vidriera digital para potenciar el comercio local.',
+  title: 'App de Preventa',
+  description: 'Herramienta de ventas para preventistas.',
   manifest: '/manifest.webmanifest',
 };
 

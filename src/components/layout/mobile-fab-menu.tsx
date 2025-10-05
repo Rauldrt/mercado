@@ -3,29 +3,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, ShoppingBag, Heart, ShoppingCart, Plus, X } from 'lucide-react';
+import { Home, Users, Package, FilePlus, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useCart } from '@/contexts/cart-context';
-import { useWishlist } from '@/contexts/wishlist-context';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function MobileFabMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const { cartCount } = useCart();
-  const { wishlistCount } = useWishlist();
+  const { user } = useAuth();
 
   const menuItems = [
     { href: '/', label: 'Inicio', icon: Home },
-    { href: '/#products', label: 'Productos', icon: ShoppingBag },
-    { href: '/wishlist', label: 'Deseos', icon: Heart, badge: 'wishlist' },
-    { href: '/checkout', label: 'Carrito', icon: ShoppingCart, badge: 'cart' },
+    { href: '/admin/customers', label: 'Clientes', icon: Users },
+    { href: '/admin/products', label: 'Productos', icon: Package },
+    { href: '/admin/products', label: 'Nuevo Pedido', icon: FilePlus }, // Links to products to start an order
   ];
-
-  const getBadgeCount = (badge?: string) => {
-    if (badge === 'cart') return cartCount;
-    if (badge === 'wishlist') return wishlistCount;
-    return 0;
-  };
+  
+  if (!user) return null;
 
   return (
     <div className="md:hidden">
@@ -46,7 +40,6 @@ export default function MobileFabMenu() {
         >
           <div className="flex flex-col items-end gap-3">
             {menuItems.map((item) => {
-              const badgeCount = getBadgeCount(item.badge);
               return (
                 <div key={item.href} className="flex items-center gap-3">
                   <div className="rounded-md bg-background px-3 py-2 text-sm font-semibold shadow-md">
@@ -61,11 +54,6 @@ export default function MobileFabMenu() {
                   >
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5" />
-                      {badgeCount > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                          {badgeCount}
-                        </span>
-                      )}
                     </Link>
                   </Button>
                 </div>
