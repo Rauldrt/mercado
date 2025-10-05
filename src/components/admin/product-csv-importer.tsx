@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Papa from 'papaparse';
-import { z } from 'zod';
+import { ZodError, z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,13 +15,15 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { setProductWithId, getProductById } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   csvFile: z
@@ -45,10 +47,16 @@ interface ProductCsvImporterProps {
   onImportSuccess: () => void;
 }
 
+interface ImportError {
+  row: number;
+  message: string;
+}
+
 export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImporterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const { toast } = useToast();
+  const [importErrors, setImportErrors] = useState<ImportError[]>([]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,6 +64,8 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsImporting(true);
+    setImportErrors([]);
+    
     try {
       const results = await new Promise<Papa.ParseResult<any>>((resolve, reject) => {
         Papa.parse(data.csvFile, {
@@ -75,15 +85,13 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       }
       
       let importedCount = 0;
-      let errorCount = 0;
+      const errors: ImportError[] = [];
       
       const productPromises = results.data.map(async (row, index) => {
         if (!row.id) {
-            // Skip empty rows or rows without an ID
             return;
         }
         try {
-          // Validate each row against the schema
           const parsedRow = productRowSchema.parse(row);
           const { id, ...csvData } = parsedRow;
 
@@ -92,10 +100,8 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           let productPayload: Partial<Omit<Product, 'id'>>;
 
           if (existingProduct) {
-            // If product exists, just pass the data from the CSV to be updated.
             productPayload = csvData;
           } else {
-            // If it's a new product, create a full object with default values.
             productPayload = {
               ...csvData,
               stock: 0,
@@ -106,13 +112,17 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
             };
           }
           
-          // Use setProductWithId which will create or merge
           await setProductWithId(id, productPayload);
           importedCount++;
 
         } catch (e) {
-          errorCount++;
-          console.error(`Error en la fila ${index + 2}:`, e);
+          const rowIndex = index + 2; // +1 for header row, +1 for 0-based index
+          let errorMessage = `Error desconocido.`;
+          if (e instanceof ZodError) {
+             errorMessage = e.errors.map(err => `${err.path[0]}: ${err.message}`).join(', ');
+          }
+          errors.push({ row: rowIndex, message: errorMessage });
+          console.error(`Error en la fila ${rowIndex}:`, e);
         }
       });
       
@@ -120,9 +130,13 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       
       toast({
         title: 'Importación Completada',
-        description: `${importedCount} productos importados/actualizados, ${errorCount} filas con errores.`,
+        description: `${importedCount} productos importados/actualizados, ${errors.length} filas con errores.`,
       });
 
+      if (errors.length > 0) {
+        setImportErrors(errors);
+      }
+      
       if (importedCount > 0) {
         onImportSuccess();
       }
@@ -141,6 +155,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <div className="flex justify-end mb-4">
@@ -187,6 +202,37 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
         </Form>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={importErrors.length > 0} onOpenChange={() => setImportErrors([])}>
+        <DialogContent className="max-w-2xl">
+            <DialogHeader>
+            <DialogTitle>Errores de Importación</DialogTitle>
+            <DialogDescription>
+                Se encontraron los siguientes errores en el archivo CSV. Por favor, corrígelos e intenta de nuevo.
+            </DialogDescription>
+            </DialogHeader>
+            <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Detalles de Errores</AlertTitle>
+                <AlertDescription>
+                    <div className="max-h-60 overflow-y-auto mt-2">
+                    <ul className="space-y-1 font-mono text-xs">
+                        {importErrors.map((error, i) => (
+                        <li key={i}>
+                            <span className="font-bold">Fila {error.row}:</span> {error.message}
+                        </li>
+                        ))}
+                    </ul>
+                    </div>
+                </AlertDescription>
+            </Alert>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button onClick={() => setImportErrors([])}>Entendido</Button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
-
