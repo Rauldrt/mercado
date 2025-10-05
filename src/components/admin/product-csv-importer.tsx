@@ -78,6 +78,10 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       let errorCount = 0;
       
       const productPromises = results.data.map(async (row, index) => {
+        if (!row.id) {
+            // Skip empty rows or rows without an ID
+            return;
+        }
         try {
           // Validate each row against the schema
           const parsedRow = productRowSchema.parse(row);
@@ -185,3 +189,4 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
     </Dialog>
   );
 }
+
