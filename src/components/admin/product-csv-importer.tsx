@@ -19,7 +19,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { addProduct } from '@/lib/firebase';
+import { setProductWithId } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
 import { Upload, Loader2 } from 'lucide-react';
 
@@ -31,15 +31,13 @@ const formSchema = z.object({
     .refine((file) => file?.type === 'text/csv', 'El archivo debe ser un CSV.'),
 });
 
-// Zod schema for a single product row in the CSV
+// Zod schema for a single product row in the CSV, simplified
 const productRowSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  price: z.coerce.number().positive(),
-  category: z.string().min(1),
-  stock: z.coerce.number().int().min(0),
-  imageUrls: z.string().transform(val => val.split(',').map(url => url.trim())),
-  promotionTag: z.string().optional(),
+  id: z.string().min(1, { message: 'El "id" es requerido.' }),
+  name: z.string().min(1, { message: 'El "name" es requerido.' }),
+  price: z.coerce.number().positive({ message: 'El "price" debe ser un número positivo.' }),
+  description: z.string().min(1, { message: 'La "description" es requerida.' }),
+  category: z.string().min(1, { message: 'La "category" es requerida.' }),
 });
 
 
@@ -68,7 +66,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
         });
       });
 
-      const requiredHeaders = ['name', 'description', 'price', 'category', 'stock', 'imageUrls'];
+      const requiredHeaders = ['id', 'name', 'price', 'description', 'category'];
       const fileHeaders = results.meta.fields || [];
       const missingHeaders = requiredHeaders.filter(h => !fileHeaders.includes(h));
 
@@ -81,23 +79,22 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       
       const productPromises = results.data.map(async (row, index) => {
         try {
-          // Validate each row
+          // Validate each row against the simplified schema
           const parsedRow = productRowSchema.parse(row);
 
-          const newProduct: Omit<Product, 'id' | 'specifications' | 'vendor' | 'vendorId'> = {
-            ...parsedRow,
-            vendor: 'Tienda Principal', // Default vendor
-            vendorId: 'admin', // Default vendorId
-          };
+          const { id, ...data } = parsedRow;
 
-          // To keep it simple, we'll add an empty specifications object.
-          // This could be expanded to support JSON in the CSV.
+          // Create a full product object with default values for missing fields
           const finalProduct: Omit<Product, 'id'> = {
-            ...newProduct,
+            ...data,
+            stock: 0,
+            imageUrls: ['https://placehold.co/600x600'], // Default placeholder
             specifications: {},
+            vendor: 'Tienda Principal',
+            vendorId: 'admin',
           };
 
-          await addProduct(finalProduct);
+          await setProductWithId(id, finalProduct);
           importedCount++;
         } catch (e) {
           errorCount++;
@@ -109,7 +106,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       
       toast({
         title: 'Importación Completada',
-        description: `${importedCount} productos importados, ${errorCount} filas con errores.`,
+        description: `${importedCount} productos importados/actualizados, ${errorCount} filas con errores.`,
       });
 
       if (importedCount > 0) {
@@ -144,7 +141,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           <DialogTitle>Importar Productos Masivamente</DialogTitle>
           <DialogDescription>
             Sube un archivo .csv con los productos. Asegúrate de que las columnas sean: 
-            `name`, `description`, `price`, `category`, `stock`, `imageUrls` (separadas por comas), y opcionalmente `promotionTag`.
+            `id`, `name`, `price`, `description`, y `category`. El resto de los datos podrás completarlos luego.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

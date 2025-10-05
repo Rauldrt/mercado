@@ -66,6 +66,12 @@ export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> 
     return docRef.id;
 }
 
+export const setProductWithId = async (id: string, product: Omit<Product, 'id'>): Promise<void> => {
+    const docRef = doc(db, 'products', id);
+    await setDoc(docRef, product, { merge: true }); // Merge to avoid overwriting existing data if just updating
+}
+
+
 export const updateProduct = async (id: string, productUpdate: Partial<Omit<Product, 'id'>>): Promise<void> => {
     const docRef = doc(db, 'products', id);
     await updateDoc(docRef, productUpdate);
