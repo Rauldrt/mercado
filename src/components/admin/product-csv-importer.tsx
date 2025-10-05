@@ -161,7 +161,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       setIsImporting(false);
       form.reset();
     }
-  };
+  }
 
   return (
     <>
@@ -219,7 +219,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
             <DialogDescription>
                 Se encontraron los siguientes errores en el archivo CSV. Por favor, corrígelos e intenta de nuevo.
             </DialogDescription>
-            </Header>
+            </DialogHeader>
             <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Detalles de Errores</AlertTitle>
