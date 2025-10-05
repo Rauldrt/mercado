@@ -15,8 +15,8 @@ export default function MobileFabMenu() {
   const menuItems = [
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/admin/customers', label: 'Clientes', icon: Users },
-    { href: '/admin/products', label: 'Productos', icon: Package },
-    { href: '/admin/products', label: 'Nuevo Pedido', icon: FilePlus }, // Links to products to start an order
+    { href: '/admin/products', label: 'Nuevo Pedido', icon: FilePlus },
+    { href: '/admin/catalog', label: 'Catálogo', icon: Package },
   ];
   
   if (!user) return null;
@@ -41,7 +41,7 @@ export default function MobileFabMenu() {
           <div className="flex flex-col items-end gap-3">
             {menuItems.map((item) => {
               return (
-                <div key={item.href} className="flex items-center gap-3">
+                <div key={item.label} className="flex items-center gap-3">
                   <div className="rounded-md bg-background px-3 py-2 text-sm font-semibold shadow-md">
                     {item.label}
                   </div>

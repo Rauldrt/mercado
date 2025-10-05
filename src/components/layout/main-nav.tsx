@@ -40,7 +40,10 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
         Clientes
       </Link>
       <Link href="/admin/products" className={linkClass("/admin/products")} onClick={handleLinkClick}>
-        Productos
+        Nuevo Pedido
+      </Link>
+      <Link href="/admin/catalog" className={linkClass("/admin/catalog")} onClick={handleLinkClick}>
+        Catálogo
       </Link>
     </nav>
   );

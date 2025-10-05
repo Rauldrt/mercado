@@ -13,7 +13,7 @@ import { Plus, Minus } from 'lucide-react';
 import React, { useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { addCustomer } from '@/lib/firebase';
+import { updateCustomer, getCustomerById } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import type { Customer } from '@/lib/types';
 import type { z } from 'zod';
@@ -23,7 +23,7 @@ export default function CheckoutPage() {
   const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
   const { user } = useAuth();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState<z.infer<typeof checkoutFormSchema> | null>(null);
+  const [customerInfo, setCustomerInfo] = useState<Partial<Customer> | null>(null);
   
   // State to hold the order details at the moment of purchase
   const [orderedItems, setOrderedItems] = useState<typeof cartItems>([]);
@@ -42,38 +42,37 @@ export default function CheckoutPage() {
   const handleOrderSuccess = async (data: z.infer<typeof checkoutFormSchema>) => {
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
-    setCustomerInfo(data);
-
-    if (data.createAccount || user) {
-      const newCustomer: Omit<Customer, 'id'> = {
-        userId: user?.uid,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: user?.email || data.email,
-        address: data.address,
-        city: data.city,
-        zip: data.zip,
-        phoneNumber: data.phoneNumber,
-        gpsLocation: data.gpsLocation,
-        purchaseHistory: [{
-          orderId: uuidv4(),
-          date: new Date().toISOString(),
-          total: totalPrice + shippingCost,
-        }]
-      };
-      
-      try {
-        const customerId = await addCustomer(newCustomer);
-        console.log(`Customer saved with ID: ${customerId}`);
-      } catch (error) {
-        console.error("Failed to save customer:", error);
-        // Optionally, show a toast to the user that saving their info failed.
+    
+    try {
+      // Fetch the selected customer to get their full data
+      const selectedCustomer = await getCustomerById(data.customerId);
+      if (!selectedCustomer) {
+        console.error("Selected customer not found!");
+        // Optionally show a toast error
+        return;
       }
+      setCustomerInfo(selectedCustomer);
+
+      // Append the new order to the customer's purchase history
+      const newPurchase = {
+        orderId: uuidv4(),
+        date: new Date().toISOString(),
+        total: totalPrice + shippingCost,
+      };
+
+      const updatedHistory = [...(selectedCustomer.purchaseHistory || []), newPurchase];
+      
+      await updateCustomer(selectedCustomer.id, { purchaseHistory: updatedHistory });
+      
+      console.log(`Order saved for customer ID: ${selectedCustomer.id}`);
+
+      setShowPostOrderActions(true);
+      clearCart();
+
+    } catch (error) {
+      console.error("Failed to save order:", error);
+      // Optionally, show a toast to the user that saving their info failed.
     }
-
-
-    setShowPostOrderActions(true);
-    clearCart();
   };
 
   const handleDownloadPdf = () => {
@@ -94,7 +93,7 @@ export default function CheckoutPage() {
     if (!customerInfo) return;
 
     const finalTotalForShare = orderedTotalPrice + shippingCost;
-    let message = '¡Hola! Te comparto el resumen de mi pedido:\n\n';
+    let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n`;
     orderedItems.forEach(item => {
       message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
     });
@@ -152,7 +151,7 @@ export default function CheckoutPage() {
                   <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>Datos del Cliente:</h3>
                   <p style={{ margin: '0' }}><strong>Nombre:</strong> {customerInfo.firstName} {customerInfo.lastName}</p>
                   <p style={{ margin: '0' }}><strong>Dirección:</strong> {customerInfo.address}, {customerInfo.city}, {customerInfo.zip}</p>
-                  <p style={{ margin: '0' }}><strong>Email:</strong> {user?.email || customerInfo.email}</p>
+                  <p style={{ margin: '0' }}><strong>Email:</strong> {customerInfo.email}</p>
               </div>
           )}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -200,12 +199,12 @@ export default function CheckoutPage() {
       </div>
 
 
-      <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Finalizar Compra</h1>
+      <h1 className="text-3xl font-bold tracking-tight mb-6 font-headline">Cargar Pedido</h1>
       <div className="grid lg:grid-cols-2 lg:gap-12">
         <div className="lg:order-2">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-xl">Resumen de tu pedido</CardTitle>
+                    <CardTitle className="font-headline text-xl">Resumen de pedido</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {itemsToDisplay.map(item => (
@@ -262,7 +261,7 @@ export default function CheckoutPage() {
             </Card>
              {cartCount > 0 && !showPostOrderActions && (
                 <p className="text-center text-sm text-muted-foreground mt-4">
-                    ¿Necesitas cambiar algo? <Link href="/" className="underline hover:text-primary">Volver a la tienda</Link>
+                    ¿Necesitas cambiar algo? <Link href="/admin/products" className="underline hover:text-primary">Volver al catálogo</Link>
                 </p>
             )}
         </div>
