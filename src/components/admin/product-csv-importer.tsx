@@ -19,7 +19,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { setProductWithId } from '@/lib/firebase';
+import { setProductWithId, getProductById } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
 import { Upload, Loader2 } from 'lucide-react';
 
@@ -31,7 +31,7 @@ const formSchema = z.object({
     .refine((file) => file?.type === 'text/csv', 'El archivo debe ser un CSV.'),
 });
 
-// Zod schema for a single product row in the CSV, simplified
+// Zod schema for a single product row in the CSV
 const productRowSchema = z.object({
   id: z.string().min(1, { message: 'El "id" es requerido.' }),
   name: z.string().min(1, { message: 'El "name" es requerido.' }),
@@ -79,23 +79,33 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       
       const productPromises = results.data.map(async (row, index) => {
         try {
-          // Validate each row against the simplified schema
+          // Validate each row against the schema
           const parsedRow = productRowSchema.parse(row);
+          const { id, ...csvData } = parsedRow;
 
-          const { id, ...data } = parsedRow;
+          const existingProduct = await getProductById(id);
 
-          // Create a full product object with default values for missing fields
-          const finalProduct: Omit<Product, 'id'> = {
-            ...data,
-            stock: 0,
-            imageUrls: ['https://placehold.co/600x600'], // Default placeholder
-            specifications: {},
-            vendor: 'Tienda Principal',
-            vendorId: 'admin',
-          };
+          let productPayload: Partial<Omit<Product, 'id'>>;
 
-          await setProductWithId(id, finalProduct);
+          if (existingProduct) {
+            // If product exists, just pass the data from the CSV to be updated.
+            productPayload = csvData;
+          } else {
+            // If it's a new product, create a full object with default values.
+            productPayload = {
+              ...csvData,
+              stock: 0,
+              imageUrls: ['https://placehold.co/600x600'],
+              specifications: {},
+              vendor: 'Tienda Principal',
+              vendorId: 'admin',
+            };
+          }
+          
+          // Use setProductWithId which will create or merge
+          await setProductWithId(id, productPayload);
           importedCount++;
+
         } catch (e) {
           errorCount++;
           console.error(`Error en la fila ${index + 2}:`, e);

@@ -66,9 +66,11 @@ export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> 
     return docRef.id;
 }
 
-export const setProductWithId = async (id: string, product: Omit<Product, 'id'>): Promise<void> => {
+export const setProductWithId = async (id: string, product: Partial<Omit<Product, 'id'>>): Promise<void> => {
     const docRef = doc(db, 'products', id);
-    await setDoc(docRef, product, { merge: true }); // Merge to avoid overwriting existing data if just updating
+    // Usamos merge: true para crear el producto si no existe, o para actualizarlo si ya existe.
+    // Esto asegura que no se sobrescriban campos que no están en el CSV (como imageUrls, etc.).
+    await setDoc(docRef, product, { merge: true });
 }
 
 
