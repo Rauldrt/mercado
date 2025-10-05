@@ -92,6 +92,11 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
             return;
         }
         try {
+          // Pre-process price to handle comma decimal separators
+          if (row.price && typeof row.price === 'string') {
+            row.price = row.price.replace(',', '.');
+          }
+
           const parsedRow = productRowSchema.parse(row);
           const { id, ...csvData } = parsedRow;
 
@@ -120,6 +125,8 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           let errorMessage = `Error desconocido.`;
           if (e instanceof ZodError) {
              errorMessage = e.errors.map(err => `${err.path[0]}: ${err.message}`).join(', ');
+          } else if (e instanceof Error) {
+            errorMessage = e.message;
           }
           errors.push({ row: rowIndex, message: errorMessage });
           console.error(`Error en la fila ${rowIndex}:`, e);
@@ -135,6 +142,9 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
 
       if (errors.length > 0) {
         setImportErrors(errors);
+      } else {
+        // Only close if no errors, so user can see the error dialog
+        setIsOpen(false);
       }
       
       if (importedCount > 0) {
@@ -149,7 +159,6 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       });
     } finally {
       setIsImporting(false);
-      setIsOpen(false);
       form.reset();
     }
   };
@@ -210,7 +219,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
             <DialogDescription>
                 Se encontraron los siguientes errores en el archivo CSV. Por favor, corrígelos e intenta de nuevo.
             </DialogDescription>
-            </DialogHeader>
+            </Header>
             <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Detalles de Errores</AlertTitle>
