@@ -44,12 +44,18 @@ function AdminCatalogPage() {
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return products;
-    const lowercasedQuery = searchQuery.toLowerCase();
-    return products.filter(product => 
-        product.name.toLowerCase().includes(lowercasedQuery) ||
-        product.id.toLowerCase().includes(lowercasedQuery) ||
-        product.description.toLowerCase().includes(lowercasedQuery)
-    );
+    
+    const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.trim() !== '');
+    if (searchTerms.length === 0) return products;
+
+    return products.filter(product => {
+        const productText = `
+            ${product.name.toLowerCase()} 
+            ${product.id.toLowerCase()} 
+            ${product.description.toLowerCase()}
+        `;
+        return searchTerms.every(term => productText.includes(term));
+    });
   }, [searchQuery, products]);
 
   if (isAuthenticating || !user || loading) {

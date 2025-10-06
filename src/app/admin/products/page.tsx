@@ -60,13 +60,18 @@ function AdminProductsPage() {
     }
 
     if (searchQuery) {
-        const lowercasedQuery = searchQuery.toLowerCase();
-        filtered = filtered.filter(p => 
-            p.id.toLowerCase().includes(lowercasedQuery) ||
-            p.name.toLowerCase().includes(lowercasedQuery) ||
-            p.category.toLowerCase().includes(lowercasedQuery) ||
-            p.description.toLowerCase().includes(lowercasedQuery)
-        );
+        const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.trim() !== '');
+        if (searchTerms.length > 0) {
+            filtered = filtered.filter(p => {
+                const productText = `
+                    ${p.id.toLowerCase()} 
+                    ${p.name.toLowerCase()} 
+                    ${p.category.toLowerCase()} 
+                    ${p.description.toLowerCase()}
+                `;
+                return searchTerms.every(term => productText.includes(term));
+            });
+        }
     }
     
     return filtered;
