@@ -16,6 +16,7 @@ export type Product = {
 export type CartItem = {
   product: Product;
   quantity: number;
+  comment?: string;
 };
 
 export type Customer = {
@@ -33,6 +34,7 @@ export type Customer = {
     orderId: string;
     date: string;
     total: number;
+    items: CartItem[];
   }[];
 };
 

@@ -11,6 +11,7 @@ interface CartContextType {
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateComment: (productId: string, comment: string) => void;
   clearCart: () => void;
   cartCount: number;
   totalPrice: number;
@@ -60,7 +61,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             : item
         );
       }
-      return [...prevItems, { product, quantity }];
+      return [...prevItems, { product, quantity, comment: '' }];
     });
   }, []);
 
@@ -73,18 +74,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       removeFromCart(productId);
     } else {
       setCartItems(prevItems => {
-        const existingItem = prevItems.find(item => item.product.id === productId);
-        if (existingItem) {
-          return prevItems.map(item =>
-            item.product.id === productId ? { ...item, quantity } : item
-          );
-        }
-        // This case can be removed if updateQuantity is only called for existing items
-        return prevItems; 
+        return prevItems.map(item =>
+          item.product.id === productId ? { ...item, quantity } : item
+        );
       });
     }
   }, [removeFromCart]);
   
+  const updateComment = useCallback((productId: string, comment: string) => {
+    setCartItems(prevItems => {
+      return prevItems.map(item =>
+        item.product.id === productId ? { ...item, comment } : item
+      );
+    });
+  }, []);
+
   const getItemQuantity = useCallback((productId: string) => {
     const item = cartItems.find(item => item.product.id === productId);
     return item ? item.quantity : 0;
@@ -105,6 +109,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
+    updateComment,
     clearCart,
     cartCount,
     totalPrice,

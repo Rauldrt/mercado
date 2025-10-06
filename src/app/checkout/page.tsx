@@ -15,18 +15,19 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { updateCustomer, getCustomerById } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
-import type { Customer } from '@/lib/types';
+import type { Customer, CartItem } from '@/lib/types';
 import type { z } from 'zod';
 import type { checkoutFormSchema } from '@/components/checkout/checkout-form';
+import { Input } from '@/components/ui/input';
 
 export default function CheckoutPage() {
-  const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
+  const { cartItems, totalPrice, cartCount, updateQuantity, updateComment, clearCart } = useCart();
   const { user } = useAuth();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<Partial<Customer> | null>(null);
   
   // State to hold the order details at the moment of purchase
-  const [orderedItems, setOrderedItems] = useState<typeof cartItems>([]);
+  const [orderedItems, setOrderedItems] = useState<CartItem[]>([]);
   const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
 
   const shippingCost = 0; // Removed shipping cost as requested
@@ -58,6 +59,7 @@ export default function CheckoutPage() {
         orderId: uuidv4(),
         date: new Date().toISOString(),
         total: totalPrice + shippingCost,
+        items: cartItems,
       };
 
       const updatedHistory = [...(selectedCustomer.purchaseHistory || []), newPurchase];
@@ -96,6 +98,9 @@ export default function CheckoutPage() {
     let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n`;
     orderedItems.forEach(item => {
       message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
+      if (item.comment) {
+        message += `  _Comentario: ${item.comment}_\n`;
+      }
     });
     message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
     
@@ -166,7 +171,10 @@ export default function CheckoutPage() {
               <tbody>
                   {itemsToDisplay.map(item => (
                       <tr key={item.product.id}>
-                          <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>{item.product.name}</td>
+                          <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>
+                            {item.product.name}
+                            {item.comment && <div style={{fontSize: '12px', color: '#555'}}><em>Comentario: {item.comment}</em></div>}
+                          </td>
                           <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #EEE' }}>{item.quantity}</td>
                           <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price)}</td>
                           <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</td>
@@ -208,35 +216,51 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {itemsToDisplay.map(item => (
-                        <div key={item.product.id} className="flex items-center gap-4">
-                            <div className="relative h-16 w-16 rounded-md overflow-hidden">
-                                <Image 
-                                    src={item.product.imageUrls[0]}
-                                    alt={item.product.name}
-                                    fill
-                                    className="object-cover"
-                                    sizes="64px"
-                                    data-ai-hint="product thumbnail"
-                                />
-                            </div>
-                            <div className="flex-grow space-y-1">
-                                <p className="font-medium">{item.product.name}</p>
-                                {!showPostOrderActions && cartCount > 0 && (
-                                <div className="flex items-center gap-2">
-                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
-                                        <Minus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
-                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleIncreaseQuantity(item.product.id, item.quantity)}>
-                                        <Plus className="h-3 w-3" />
-                                    </Button>
+                        <div key={item.product.id} className="space-y-3">
+                            <div className="flex items-start gap-4">
+                                <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
+                                    <Image 
+                                        src={item.product.imageUrls[0]}
+                                        alt={item.product.name}
+                                        fill
+                                        className="object-cover"
+                                        sizes="64px"
+                                        data-ai-hint="product thumbnail"
+                                    />
                                 </div>
-                                )}
-                                {showPostOrderActions && (
-                                    <p className="text-sm text-muted-foreground">Cantidad: {item.quantity}</p>
-                                )}
+                                <div className="flex-grow space-y-1">
+                                    <p className="font-medium">{item.product.name}</p>
+                                    {!showPostOrderActions && cartCount > 0 && (
+                                    <div className="flex items-center gap-2">
+                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
+                                            <Minus className="h-3 w-3" />
+                                        </Button>
+                                        <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
+                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleIncreaseQuantity(item.product.id, item.quantity)}>
+                                            <Plus className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                    )}
+                                    {showPostOrderActions && (
+                                        <p className="text-sm text-muted-foreground">Cantidad: {item.quantity}</p>
+                                    )}
+                                </div>
+                                <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
                             </div>
-                            <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
+                            {!showPostOrderActions && cartCount > 0 && (
+                                <Input
+                                    type="text"
+                                    placeholder="Añadir comentario (opcional)..."
+                                    value={item.comment || ''}
+                                    onChange={(e) => updateComment(item.product.id, e.target.value)}
+                                    className="text-sm"
+                                />
+                            )}
+                             {showPostOrderActions && item.comment && (
+                                <p className="text-sm text-muted-foreground pl-2 border-l-2 ml-2">
+                                   <span className="font-medium">Comentario:</span> {item.comment}
+                                </p>
+                            )}
                         </div>
                     ))}
                     <Separator />
