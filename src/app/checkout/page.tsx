@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { updateCustomer, getCustomerById } from '@/lib/firebase';
@@ -45,9 +45,14 @@ export default function CheckoutPage() {
     const orderId = uuidv4();
     const orderDate = new Date().toISOString();
     
-    setOrderedItems([...cartItems]); // Snapshot the cart items
-    setOrderedTotalPrice(totalPrice); // Snapshot the total price
-    setOrderComment(data.orderComment || '');
+    // Create snapshots of the order details right away
+    const currentCartItems = [...cartItems];
+    const currentTotalPrice = totalPrice;
+    const currentOrderComment = data.orderComment || '';
+    
+    setOrderedItems(currentCartItems);
+    setOrderedTotalPrice(currentTotalPrice);
+    setOrderComment(currentOrderComment);
     setOrderDetailsForPdf({ orderId, date: orderDate });
     
     try {
@@ -55,7 +60,6 @@ export default function CheckoutPage() {
       const selectedCustomer = await getCustomerById(data.customerId);
       if (!selectedCustomer) {
         console.error("Selected customer not found!");
-        // Optionally show a toast error
         return;
       }
       setCustomerInfo(selectedCustomer);
@@ -64,9 +68,9 @@ export default function CheckoutPage() {
       const newPurchase = {
         orderId: orderId,
         date: orderDate,
-        total: totalPrice + shippingCost,
-        items: cartItems,
-        orderComment: data.orderComment,
+        total: currentTotalPrice + shippingCost,
+        items: currentCartItems, // Ensure items are included
+        orderComment: currentOrderComment,
       };
 
       const updatedHistory = [...(selectedCustomer.purchaseHistory || []), newPurchase];
@@ -80,7 +84,6 @@ export default function CheckoutPage() {
 
     } catch (error) {
       console.error("Failed to save order:", error);
-      // Optionally, show a toast to the user that saving their info failed.
     }
   };
 
@@ -111,7 +114,6 @@ export default function CheckoutPage() {
     }
     message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
     
-    // Only add shipping if it's greater than 0
     if (shippingCost > 0) {
         message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
     }
@@ -137,10 +139,18 @@ export default function CheckoutPage() {
   const totalToDisplay = showPostOrderActions ? orderedTotalPrice : totalPrice;
   const finalTotalToDisplay = totalToDisplay + shippingCost;
 
+  // This effect ensures we have a stable order ID and date for the PDF *after* the order is successful.
+  useEffect(() => {
+    if (orderDetailsForPdf) {
+      // Logic that needs to run after orderDetailsForPdf is set can go here.
+      // For example, if you wanted to auto-trigger a download, which we don't.
+    }
+  }, [orderDetailsForPdf]);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Contenido oculto para generar el PDF */}
+      {/* Contenido oculto para generar el PDF. Usará el estado `orderedItems` que es estable post-compra. */}
       <div id="pdf-content" style={{ position: 'absolute', left: '-9999px', width: '800px', padding: '20px', backgroundColor: 'white', color: 'black' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #EEE', paddingBottom: '20px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -184,7 +194,7 @@ export default function CheckoutPage() {
                   </tr>
               </thead>
               <tbody>
-                  {itemsToDisplay.map(item => (
+                  {orderedItems.map(item => (
                       <tr key={item.product.id}>
                           <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>
                             {item.product.name}
@@ -200,7 +210,7 @@ export default function CheckoutPage() {
               <div style={{ width: '250px', fontSize: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span>Subtotal:</span>
-                      <span>${new Intl.NumberFormat('es-AR').format(totalToDisplay)}</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}</span>
                   </div>
                   {shippingCost > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -210,7 +220,7 @@ export default function CheckoutPage() {
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', borderTop: '2px solid #EEE', paddingTop: '8px' }}>
                       <span>Total:</span>
-                      <span>${new Intl.NumberFormat('es-AR').format(finalTotalToDisplay)}</span>
+                      <span>${new Intl.NumberFormat('es-AR').format(orderedTotalPrice + shippingCost)}</span>
                   </div>
               </div>
           </div>
@@ -308,3 +318,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

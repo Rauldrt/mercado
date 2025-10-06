@@ -140,7 +140,7 @@ export default function AdminOrdersTable() {
           {selectedOrder && (
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
               <div className="space-y-3">
-                 {selectedOrder.items.map(item => (
+                 {selectedOrder.items && selectedOrder.items.map(item => (
                     <div key={item.product.id} className="flex items-start gap-4">
                         <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
                             <Image 
@@ -160,6 +160,9 @@ export default function AdminOrdersTable() {
                         <p className="font-semibold text-sm">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
                     </div>
                  ))}
+                 {!selectedOrder.items && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No hay detalles de productos para este pedido.</p>
+                 )}
               </div>
               <Separator />
                {selectedOrder.orderComment && (
@@ -180,3 +183,4 @@ export default function AdminOrdersTable() {
   );
 }
 
+    
