@@ -13,9 +13,23 @@ interface MainNavProps {
 export default function MainNav({ vertical = false, onClose }: MainNavProps) {
   const pathname = usePathname();
 
-  const linkClass = (href: string) => cn(
-    "text-sm font-medium transition-colors hover:text-primary",
-    pathname.startsWith(href) ? "text-primary" : "text-muted-foreground",
+  const linkClass = (href: string) => {
+    // A special case for the homepage to avoid it being active for all routes.
+    if (href === "/") {
+        return cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            pathname === href ? "text-primary" : "text-muted-foreground"
+        );
+    }
+    return cn(
+        "text-sm font-medium transition-colors hover:text-primary",
+        pathname.startsWith(href) ? "text-primary" : "text-muted-foreground"
+    );
+  };
+
+  const navClass = cn(
+    "flex items-center space-x-4 lg:space-x-6",
+    { "flex-col space-y-4 space-x-0": vertical }
   );
 
   const handleLinkClick = () => {
