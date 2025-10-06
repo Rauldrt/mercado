@@ -119,6 +119,12 @@ const nextConfig = {
         hostname: 'www.congeladosdelplata.com.ar',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ss-static-001.esmsv.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
