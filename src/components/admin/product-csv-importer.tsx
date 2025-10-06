@@ -41,6 +41,7 @@ const productRowSchema = z.object({
   description: z.string().min(1, { message: 'La "description" es requerida.' }),
   category: z.string().min(1, { message: 'La "category" es requerida.' }),
   unitsPerBulk: z.coerce.number().min(1, { message: 'El campo "unitsPerBulk" debe ser al menos 1.'}),
+  imageUrls: z.string().url({ message: 'El campo "imageUrls" debe ser una URL válida.' }).optional().or(z.literal('')),
 });
 
 
@@ -109,12 +110,15 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           let productPayload: Partial<Omit<Product, 'id'>>;
 
           if (existingProduct) {
-            productPayload = csvData;
+            productPayload = {
+                ...csvData,
+                imageUrls: csvData.imageUrls ? [csvData.imageUrls] : existingProduct.imageUrls,
+            };
           } else {
             productPayload = {
               ...csvData,
               stock: 0,
-              imageUrls: ['https://placehold.co/600x600'],
+              imageUrls: csvData.imageUrls ? [csvData.imageUrls] : ['https://placehold.co/600x600'],
               specifications: {},
               vendor: 'Tienda Principal',
               vendorId: 'admin',
@@ -182,8 +186,9 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
         <DialogHeader>
           <DialogTitle>Importar Productos Masivamente</DialogTitle>
           <DialogDescription>
-            Sube un archivo .csv con los productos. Asegúrate de que las columnas sean: 
-            `id`, `name`, `price`, `description`, `category` y `unitsPerBulk`.
+            Sube un archivo .csv con los productos. Columnas requeridas: 
+            `id`, `name`, `price`, `description`, `category`, `unitsPerBulk`. 
+            Columna opcional: `imageUrls`.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
