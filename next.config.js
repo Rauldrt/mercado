@@ -1,3 +1,4 @@
+
 /** @type {import('next').NextConfig} */
 
 const withPWA = require('next-pwa')({
@@ -86,6 +87,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'toledodigitalar.vtexassets.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pricely.ar',
         port: '',
         pathname: '/**',
       }
