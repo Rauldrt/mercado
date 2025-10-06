@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: 'App de Preventa',
   description: 'Herramienta de ventas para preventistas.',
   manifest: '/manifest.webmanifest',
+  icons: {
+    apple: "/icons/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -24,6 +27,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${oswald.variable}`}>
+       <head>
+        <meta name="application-name" content="App de Preventa" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="App de Preventa" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className="font-body antialiased">
         <Providers>
             <div className="flex min-h-screen flex-col">
