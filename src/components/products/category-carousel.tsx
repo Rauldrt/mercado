@@ -38,42 +38,39 @@ const categoryIcons: { [key: string]: React.ElementType } = {
 export default function CategoryCarousel({ categories, selectedCategory, onCategorySelect }: CategoryCarouselProps) {
 
   return (
-     <div>
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {categories.map((category) => {
-              const Icon = categoryIcons[category] || categoryIcons.Default;
-              return (
-                <CarouselItem key={category} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
-                  <div className="p-1">
-                    <Card 
-                      className={cn(
-                        "cursor-pointer transition-all duration-300 h-full",
-                        selectedCategory === category 
-                          ? "bg-primary text-primary-foreground" 
-                          : "hover:shadow-md hover:-translate-y-1"
-                      )}
-                      onClick={() => onCategorySelect(category)}
-                    >
-                      <CardContent className="flex flex-col items-center justify-center p-4 gap-2 text-center">
-                          <Icon className="h-6 w-6" />
-                          <span className="text-sm font-medium">{category}</span>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              )
-            })}
-          </CarouselContent>
-          <CarouselPrevious className="ml-12" />
-          <CarouselNext className="mr-12" />
-        </Carousel>
-     </div>
+    <Carousel
+        opts={{
+        align: "start",
+        }}
+        className="w-full"
+    >
+        <CarouselContent>
+        {categories.map((category) => {
+            const Icon = categoryIcons[category] || categoryIcons.Default;
+            return (
+            <CarouselItem key={category} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <div className="p-1">
+                <Card 
+                    className={cn(
+                    "cursor-pointer transition-all duration-300 h-full",
+                    selectedCategory === category 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:shadow-md hover:-translate-y-1"
+                    )}
+                    onClick={() => onCategorySelect(category)}
+                >
+                    <CardContent className="flex flex-col items-center justify-center p-4 gap-2 text-center">
+                        <Icon className="h-6 w-6" />
+                        <span className="text-sm font-medium">{category}</span>
+                    </CardContent>
+                </Card>
+                </div>
+            </CarouselItem>
+            )
+        })}
+        </CarouselContent>
+        <CarouselPrevious className="ml-12" />
+        <CarouselNext className="mr-12" />
+    </Carousel>
   );
 }
