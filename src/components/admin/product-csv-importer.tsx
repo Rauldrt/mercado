@@ -40,6 +40,7 @@ const productRowSchema = z.object({
   price: z.coerce.number().positive({ message: 'El "price" debe ser un número positivo.' }),
   description: z.string().min(1, { message: 'La "description" es requerida.' }),
   category: z.string().min(1, { message: 'La "category" es requerida.' }),
+  unitsPerBulk: z.coerce.number().int().min(1, { message: 'El campo "unitsPerBulk" debe ser al menos 1.'}),
 });
 
 
@@ -76,7 +77,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
         });
       });
 
-      const requiredHeaders = ['id', 'name', 'price', 'description', 'category'];
+      const requiredHeaders = ['id', 'name', 'price', 'description', 'category', 'unitsPerBulk'];
       const fileHeaders = results.meta.fields || [];
       const missingHeaders = requiredHeaders.filter(h => !fileHeaders.includes(h));
 
@@ -161,7 +162,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
       setIsImporting(false);
       form.reset();
     }
-  }
+  };
 
   return (
     <>
@@ -179,7 +180,7 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           <DialogTitle>Importar Productos Masivamente</DialogTitle>
           <DialogDescription>
             Sube un archivo .csv con los productos. Asegúrate de que las columnas sean: 
-            `id`, `name`, `price`, `description`, y `category`. El resto de los datos podrás completarlos luego.
+            `id`, `name`, `price`, `description`, `category` y `unitsPerBulk`.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
