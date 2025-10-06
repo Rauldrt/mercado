@@ -155,9 +155,9 @@ export default function AdminProductsTable({ products, onProductUpdate }: AdminP
                     <Image
                         alt={product.name}
                         className="aspect-square rounded-md object-cover"
-                        height="64"
+                        height="48"
                         src={product.imageUrls[0]}
-                        width="64"
+                        width="48"
                         data-ai-hint="product thumbnail"
                     />
                     </TableCell>

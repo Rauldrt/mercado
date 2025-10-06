@@ -258,13 +258,13 @@ export default function CheckoutPage() {
                     {itemsToDisplay.map(item => (
                         <div key={`${item.product.id}-${item.presentation}`} className="space-y-3">
                             <div className="flex items-start gap-4">
-                                <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
+                                <div className="relative h-14 w-14 rounded-md overflow-hidden flex-shrink-0">
                                     <Image 
                                         src={item.product.imageUrls[0]}
                                         alt={item.product.name}
                                         fill
                                         className="object-cover"
-                                        sizes="64px"
+                                        sizes="56px"
                                         data-ai-hint="product thumbnail"
                                     />
                                 </div>
