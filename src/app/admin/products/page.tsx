@@ -101,29 +101,26 @@ function AdminProductsPage() {
           </div>
         </div>
         
-        <div className="mb-8 space-y-6">
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input 
-                    placeholder="Buscar por ID, nombre, categoría o descripción..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-        </div>
-        
-        {categories.length > 0 && (
-            <div className="sticky top-16 z-30 -mx-4 bg-background/95 pb-4 pt-4 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
-                 <div className="container mx-auto px-4">
+        <div className="sticky top-16 z-30 -mx-4 bg-background/95 py-4 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
+            <div className="container mx-auto px-4 space-y-6">
+                 <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        placeholder="Buscar por ID, nombre, categoría o descripción..."
+                        className="pl-10"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                {categories.length > 0 && (
                     <CategoryCarousel
                         categories={categories}
                         selectedCategory={selectedCategory}
                         onCategorySelect={handleCategorySelect}
                     />
-                </div>
+                )}
             </div>
-        )}
+        </div>
         
         <div className="pt-8">
             {filteredProducts.length > 0 ? (
