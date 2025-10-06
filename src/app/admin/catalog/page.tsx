@@ -5,11 +5,13 @@ import AdminProductsTable from "@/components/admin/products-table";
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Filter } from "lucide-react";
 import ProductCsvImporter from "@/components/admin/product-csv-importer";
 import { getProducts } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 function AdminCatalogPage() {
   const { user, isAuthenticating } = useAuth();
@@ -17,6 +19,9 @@ function AdminCatalogPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'hidden'>('all');
+
 
   const fetchAndSetProducts = async () => {
     setLoading(true);
@@ -42,13 +47,28 @@ function AdminCatalogPage() {
     fetchAndSetProducts();
   };
 
+  const categories = useMemo(() => ['all', ...new Set(products.map(p => p.category))], [products]);
+
   const filteredProducts = useMemo(() => {
-    if (!searchQuery) return products;
+    let filtered = products;
+
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(p => p.category === categoryFilter);
+    }
+    
+    if (visibilityFilter !== 'all') {
+      filtered = filtered.filter(p => {
+        const isVisible = p.isVisible ?? true;
+        return visibilityFilter === 'visible' ? isVisible : !isVisible;
+      });
+    }
+
+    if (!searchQuery) return filtered;
     
     const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.trim() !== '');
-    if (searchTerms.length === 0) return products;
+    if (searchTerms.length === 0) return filtered;
 
-    return products.filter(product => {
+    return filtered.filter(product => {
         const productText = `
             ${product.name.toLowerCase()} 
             ${product.id.toLowerCase()} 
@@ -56,7 +76,7 @@ function AdminCatalogPage() {
         `;
         return searchTerms.every(term => productText.includes(term));
     });
-  }, [searchQuery, products]);
+  }, [searchQuery, products, categoryFilter, visibilityFilter]);
 
   if (isAuthenticating || !user || loading) {
     return (
@@ -75,8 +95,8 @@ function AdminCatalogPage() {
             <h1 className="text-3xl font-bold tracking-tight font-headline">Gestión de Catálogo</h1>
             <p className="text-muted-foreground">Añade, edita, elimina o importa masivamente productos de tu catálogo.</p>
         </div>
-        <div className="flex justify-between items-center mb-4 gap-4">
-            <div className="relative flex-grow">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div className="relative flex-grow w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input 
                 placeholder="Buscar por nombre, ID o descripción..."
@@ -85,8 +105,33 @@ function AdminCatalogPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <ProductCsvImporter onImportSuccess={handleImportSuccess} />
+            <div className="flex flex-wrap gap-4 w-full md:w-auto">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Filtrar por categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">Todas las categorías</SelectItem>
+                      {categories.filter(c => c !== 'all').map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+              <Select value={visibilityFilter} onValueChange={(value) => setVisibilityFilter(value as any)}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Filtrar por visibilidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="visible">Visibles</SelectItem>
+                      <SelectItem value="hidden">Ocultos</SelectItem>
+                  </SelectContent>
+              </Select>
+            </div>
         </div>
+        <ProductCsvImporter onImportSuccess={handleImportSuccess} />
         <AdminProductsTable products={filteredProducts} onProductUpdate={fetchAndSetProducts} />
       </div>
   )
