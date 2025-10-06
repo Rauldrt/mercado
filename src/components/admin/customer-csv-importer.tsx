@@ -34,10 +34,11 @@ const formSchema = z.object({
 
 // Zod schema for a single customer row in the CSV
 const customerRowSchema = z.object({
-  id: z.string().min(1, { message: 'El "id" es requerido.' }),
-  firstName: z.string().min(1, { message: 'El "firstName" es requerido.' }),
-  lastName: z.string().min(1, { message: 'El "lastName" es requerido.' }),
-  email: z.string().email({ message: 'El "email" debe ser un email válido.' }),
+  id: z.string().min(1, { message: 'El "id" es requerido y no puede estar vacío.' }),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  // Valida el email solo si no está vacío
+  email: z.string().email({ message: 'El "email" debe ser un email válido.' }).optional().or(z.literal('')),
   address: z.string().optional(),
   city: z.string().optional(),
   zip: z.string().optional(),
@@ -78,31 +79,30 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
           error: reject,
         });
       });
-
-      const requiredHeaders = ['id', 'firstName', 'lastName', 'email'];
-      const fileHeaders = results.meta.fields || [];
-      const missingHeaders = requiredHeaders.filter(h => !fileHeaders.includes(h));
-
-      if (missingHeaders.length > 0) {
-        throw new Error(`El archivo CSV no contiene las siguientes columnas requeridas: ${missingHeaders.join(', ')}`);
-      }
       
       let importedCount = 0;
       const errors: ImportError[] = [];
       
       const customerPromises = results.data.map(async (row, index) => {
-        if (!row.id) {
-            return; // Skip rows without an ID
+        // Skip rows that are completely empty or just have empty values
+        if (Object.values(row).every(val => val === '' || val === null)) {
+            return;
         }
+
         try {
           const parsedRow = customerRowSchema.parse(row);
           const { id, ...csvData } = parsedRow;
+
+          // Si el id es inválido o no existe, no procesamos la fila.
+          if (!id) {
+            errors.push({ row: index + 2, message: 'La columna "id" es requerida y no puede estar vacía.' });
+            return;
+          }
 
           const existingCustomer = await getCustomerById(id);
 
           let customerPayload = { ...csvData };
           
-          // If the customer doesn't exist, initialize purchaseHistory
           if (!existingCustomer) {
             Object.assign(customerPayload, { purchaseHistory: [] });
           }
@@ -114,7 +114,7 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
           const rowIndex = index + 2; // +1 for header row, +1 for 0-based index
           let errorMessage = `Error desconocido.`;
           if (e instanceof ZodError) {
-             errorMessage = e.errors.map(err => `${err.path[0]}: ${err.message}`).join(', ');
+             errorMessage = e.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
           } else if (e instanceof Error) {
             errorMessage = e.message;
           }
@@ -167,7 +167,7 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
         <DialogHeader>
           <DialogTitle>Importar Clientes Masivamente</DialogTitle>
           <DialogDescription>
-            Sube un archivo .csv. Columnas requeridas: `id`, `firstName`, `lastName`, `email`. Opcionales: `address`, `city`, `zip`, `phoneNumber`, `gpsLocation`.
+            Sube un archivo .csv. La única columna requerida es `id`. Las demás son opcionales: `firstName`, `lastName`, `email`, `address`, `city`, `zip`, `phoneNumber`, `gpsLocation`.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -205,7 +205,7 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
             <DialogHeader>
             <DialogTitle>Errores de Importación</DialogTitle>
             <DialogDescription>
-                Se encontraron los siguientes errores en el archivo CSV. Por favor, corrígelos e intenta de nuevo.
+                Se encontraron los siguientes errores en el archivo CSV. Las filas con errores no fueron importadas.
             </DialogDescription>
             </DialogHeader>
             <Alert variant="destructive">
