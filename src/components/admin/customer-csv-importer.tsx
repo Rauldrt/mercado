@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { setCustomerWithId, getCustomerById } from '@/lib/firebase';
 import { Upload, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/auth-context';
 
 const formSchema = z.object({
   csvFile: z
@@ -61,12 +62,22 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
   const [isImporting, setIsImporting] = useState(false);
   const { toast } = useToast();
   const [importErrors, setImportErrors] = useState<ImportError[]>([]);
+  const { user } = useAuth();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!user) {
+        toast({
+            variant: 'destructive',
+            title: 'Error de Autenticación',
+            description: 'Debes estar autenticado para importar clientes.',
+        });
+        return;
+    }
+    
     setIsImporting(true);
     setImportErrors([]);
     
@@ -101,10 +112,14 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
 
           const existingCustomer = await getCustomerById(id);
 
-          let customerPayload = { ...csvData };
+          let customerPayload: any = { ...csvData };
           
-          if (!existingCustomer) {
-            Object.assign(customerPayload, { purchaseHistory: [] });
+          if (existingCustomer) {
+            // If customer exists, we just update them. We don't change the userId.
+          } else {
+            // If it's a new customer, associate them with the current user
+            customerPayload.userId = user.uid;
+            customerPayload.purchaseHistory = [];
           }
           
           await setCustomerWithId(id, customerPayload);
@@ -167,7 +182,7 @@ export default function CustomerCsvImporter({ onImportSuccess }: CustomerCsvImpo
         <DialogHeader>
           <DialogTitle>Importar Clientes Masivamente</DialogTitle>
           <DialogDescription>
-            Sube un archivo .csv. La única columna requerida es `id`. Las demás son opcionales: `firstName`, `lastName`, `email`, `address`, `city`, `zip`, `phoneNumber`, `gpsLocation`.
+            Sube un archivo .csv. La única columna requerida es `id`. Las demás son opcionales: `firstName`, `lastName`, `email`, `address`, `city`, `zip`, `phoneNumber`, `gpsLocation`. Los nuevos clientes se asignarán a tu usuario.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

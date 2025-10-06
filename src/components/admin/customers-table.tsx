@@ -33,6 +33,7 @@ import {
 import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2 } from "lucide-react";
 import CustomerForm from "./customer-form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function AdminCustomersTable() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -41,11 +42,13 @@ export default function AdminCustomersTable() {
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchCustomers = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const fetchedCustomers = await getCustomers();
+      const fetchedCustomers = await getCustomers(user.uid);
       setCustomers(fetchedCustomers);
     } catch (error) {
       console.error("Failed to fetch customers:", error);
@@ -53,7 +56,7 @@ export default function AdminCustomersTable() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, user]);
 
   useEffect(() => {
     fetchCustomers();
@@ -69,7 +72,12 @@ export default function AdminCustomersTable() {
     setDeleteAlertOpen(true);
   };
 
-  const handleCustomerSave = async (customerData: Omit<Customer, 'id' | 'purchaseHistory'> & { id?: string }) => {
+  const handleCustomerSave = async (customerData: Omit<Customer, 'id' | 'purchaseHistory' | 'userId'> & { id?: string }) => {
+    if (!user) {
+        toast({ variant: "destructive", title: "Error", description: "Debes estar autenticado para guardar un cliente." });
+        return;
+    }
+    
     try {
       if (customerData.id) {
         // Edit
@@ -77,10 +85,10 @@ export default function AdminCustomersTable() {
         await updateCustomer(id, dataToUpdate);
         toast({ title: "Cliente Actualizado", description: `Los datos de "${dataToUpdate.firstName} ${dataToUpdate.lastName}" se han actualizado.` });
       } else {
-        // Add a new customer, ensuring they have an empty purchase history
-        const { id, ...dataToAdd } = customerData;
+        // Add a new customer, ensuring they have an empty purchase history and are linked to the user
         const newCustomer: Omit<Customer, 'id'> = {
-            ...dataToAdd,
+            ...customerData,
+            userId: user.uid,
             purchaseHistory: []
         };
         await addCustomer(newCustomer);

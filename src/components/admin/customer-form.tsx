@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 interface CustomerFormProps {
   customer?: Customer | null;
-  onSave: (customer: Omit<Customer, 'id' | 'purchaseHistory'> & { id?: string }) => void;
+  onSave: (customer: Omit<Customer, 'id' | 'purchaseHistory' | 'userId'> & { id?: string }) => void;
   onCancel: () => void;
 }
 
@@ -83,7 +83,7 @@ export default function CustomerForm({ customer, onSave, onCancel }: CustomerFor
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const finalCustomerData: Omit<Customer, 'id' | 'purchaseHistory'> & { id?: string } = {
+    const finalCustomerData: Omit<Customer, 'id' | 'purchaseHistory' | 'userId'> & { id?: string } = {
         ...values,
     };
     if (customer?.id) {

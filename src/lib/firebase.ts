@@ -107,8 +107,9 @@ export const deletePromotion = async (id: string): Promise<void> => {
 }
 
 // Customer Operations
-export const getCustomers = async (): Promise<Customer[]> => {
-    const snapshot = await getDocs(customersCollection);
+export const getCustomers = async (userId: string): Promise<Customer[]> => {
+    const q = query(customersCollection, where("userId", "==", userId));
+    const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => docToType<Customer>(doc));
 }
 
@@ -123,21 +124,6 @@ export const getCustomerById = async (id: string): Promise<Customer | undefined>
 
 
 export const addCustomer = async (customer: Omit<Customer, 'id'>): Promise<string> => {
-    // Check if customer already exists by email
-    const q = query(customersCollection, where("email", "==", customer.email));
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-        // Customer exists, let's update their purchase history if new orders are passed
-        const existingCustomerDoc = snapshot.docs[0];
-        const customerToUpdate = { ...customer };
-        if (customer.purchaseHistory && customer.purchaseHistory.length > 0) {
-            const existingCustomerData = docToType<Customer>(existingCustomerDoc);
-            customerToUpdate.purchaseHistory = [...existingCustomerData.purchaseHistory, ...customer.purchaseHistory];
-        }
-        await updateDoc(existingCustomerDoc.ref, customerToUpdate);
-        return existingCustomerDoc.id;
-    }
-    // New customer, add them
     const docRef = await addDoc(customersCollection, customer);
     return docRef.id;
 }

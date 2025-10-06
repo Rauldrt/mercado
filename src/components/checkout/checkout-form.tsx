@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/cart-context';
+import { useAuth } from '@/contexts/auth-context';
 import { FileDown, MessageCircle, Loader2 } from 'lucide-react';
 import { getCustomers, addCustomer } from '@/lib/firebase';
 import type { Customer } from '@/lib/types';
@@ -57,6 +58,7 @@ export default function CheckoutForm({
     onShareWhatsApp
 }: CheckoutFormProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { cartItems } = useCart();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
@@ -71,9 +73,10 @@ export default function CheckoutForm({
   });
 
   const fetchCustomers = async () => {
+    if (!user) return;
     try {
       setLoadingCustomers(true);
-      const fetchedCustomers = await getCustomers();
+      const fetchedCustomers = await getCustomers(user.uid);
       setCustomers(fetchedCustomers);
     } catch (error) {
       console.error("Failed to fetch customers for checkout:", error);
@@ -88,13 +91,19 @@ export default function CheckoutForm({
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, [toast]);
+    if (user) {
+        fetchCustomers();
+    }
+  }, [user, toast]);
 
-  const handleCustomerCreated = async (newCustomerData: Omit<Customer, 'id' | 'purchaseHistory'>) => {
+  const handleCustomerCreated = async (newCustomerData: Omit<Customer, 'id' | 'purchaseHistory' | 'userId'>) => {
+    if (!user) {
+        toast({ variant: "destructive", title: "Error", description: "Debes estar autenticado." });
+        return;
+    }
     try {
-        const newCustomerWithHistory = { ...newCustomerData, purchaseHistory: [] };
-        const newId = await addCustomer(newCustomerWithHistory);
+        const newCustomerWithDetails = { ...newCustomerData, userId: user.uid, purchaseHistory: [] };
+        const newId = await addCustomer(newCustomerWithDetails);
         await fetchCustomers(); // Refresh the list
         form.setValue('customerId', newId, { shouldValidate: true });
         setCreateCustomerOpen(false);

@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useAuth } from '@/contexts/auth-context';
@@ -35,9 +36,10 @@ function AdminOrdersPage() {
   const { toast } = useToast();
 
   const fetchOrders = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const customers = await getCustomers();
+      const customers = await getCustomers(user.uid);
       const fetchedOrders: Order[] = [];
       customers.forEach((customer: Customer) => {
         if (customer.purchaseHistory) {
@@ -57,7 +59,7 @@ function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!isAuthenticating && !user) {
