@@ -82,6 +82,12 @@ const nextConfig = {
         hostname: 'sumerlabs.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'toledodigitalar.vtexassets.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
