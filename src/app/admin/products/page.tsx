@@ -1,12 +1,12 @@
 
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '@/lib/types';
 import { getProducts } from '@/lib/firebase';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import ProductGrid from '@/components/products/product-grid';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import CategoryCarousel from '@/components/products/category-carousel';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 
 function AdminProductsPage() {
   const { user, isAuthenticating } = useAuth();
@@ -22,6 +23,7 @@ function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!isAuthenticating && !user) {
@@ -50,9 +52,26 @@ function AdminProductsPage() {
     setSelectedCategory(prev => prev === category ? '' : category);
   };
   
-  const filteredProducts = selectedCategory
-    ? products.filter(p => p.category === selectedCategory)
-    : products;
+  const filteredProducts = useMemo(() => {
+    let filtered = products;
+
+    if (selectedCategory) {
+        filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    if (searchQuery) {
+        const lowercasedQuery = searchQuery.toLowerCase();
+        filtered = filtered.filter(p => 
+            p.name.toLowerCase().includes(lowercasedQuery) ||
+            p.category.toLowerCase().includes(lowercasedQuery) ||
+            p.description.toLowerCase().includes(lowercasedQuery)
+        );
+    }
+    
+    return filtered;
+
+  }, [products, selectedCategory, searchQuery]);
+
 
   if (isAuthenticating || !user || loading) {
     return (
@@ -66,7 +85,7 @@ function AdminProductsPage() {
   }
 
   return (
-      <div className="container mx-auto px-4 py-8 mb-24"> {/* Added margin-bottom */}
+      <div className="container mx-auto px-4 py-8 mb-24">
         <div className="mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight font-headline">Catálogo de Productos</h1>
@@ -74,20 +93,33 @@ function AdminProductsPage() {
           </div>
         </div>
         
-        {categories.length > 0 && (
-          <div className="mb-8">
-            <CategoryCarousel
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategorySelect={handleCategorySelect}
-            />
-          </div>
-        )}
+        <div className="mb-8 space-y-6">
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                    placeholder="Buscar por nombre, categoría o descripción..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            {categories.length > 0 && (
+                <CategoryCarousel
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategorySelect}
+                />
+            )}
+        </div>
         
         {filteredProducts.length > 0 ? (
           <ProductGrid products={filteredProducts} />
         ) : (
-          <p>No se encontraron productos para la categoría seleccionada.</p>
+          <div className='text-center py-10'>
+             <p className='text-lg font-semibold'>No se encontraron productos</p>
+             <p className='text-muted-foreground mt-2'>Intenta ajustar tu búsqueda o filtros.</p>
+          </div>
         )}
 
         {cartCount > 0 && (

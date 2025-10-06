@@ -29,36 +29,22 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Pencil, Trash2, PlusCircle, Loader2, Copy } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Copy } from "lucide-react";
 import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
-import { addProduct, updateProduct, deleteProduct, getProducts } from "@/lib/firebase";
+import { addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
 
-export default function AdminProductsTable() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface AdminProductsTableProps {
+    products: Product[];
+    onProductUpdate: () => void;
+}
+
+export default function AdminProductsTable({ products, onProductUpdate }: AdminProductsTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isFormOpen, setFormOpen] = useState(false);
   const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const { toast } = useToast();
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const products = await getProducts();
-      setAllProducts(products);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los productos." });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
@@ -90,7 +76,7 @@ export default function AdminProductsTable() {
         await addProduct(dataToAdd);
         toast({ title: "Producto Creado", description: `"${finalProductData.name}" se ha añadido a tu tienda.` });
       }
-      await fetchProducts(); // Refresh list
+      onProductUpdate();
     } catch (error) {
        toast({ variant: "destructive", title: "Error", description: "No se pudo guardar el producto." });
        console.error("Failed to save product:", error);
@@ -105,7 +91,7 @@ export default function AdminProductsTable() {
        try {
             await deleteProduct(selectedProduct.id);
             toast({ title: "Producto Eliminado", description: `"${selectedProduct.name}" se ha eliminado.` });
-            await fetchProducts(); // Refresh list
+            onProductUpdate(); // Refresh list
        } catch (error) {
             toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el producto." });
             console.error("Failed to delete product:", error);
@@ -123,22 +109,11 @@ export default function AdminProductsTable() {
       description: "ID del producto copiado al portapapeles.",
     });
   }
-  
-  if (loading) {
-    return (
-        <div className="flex justify-center items-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-    );
-  }
 
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button onClick={() => handleOpenForm(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Añadir Producto Manualmente
-        </Button>
+        {/* The 'Añadir Producto' button is now outside, but we can keep this structure for future actions */}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -156,54 +131,62 @@ export default function AdminProductsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="hidden sm:table-cell">
-                  <Image
-                    alt={product.name}
-                    className="aspect-square rounded-md object-cover"
-                    height="64"
-                    src={product.imageUrls[0]}
-                    width="64"
-                    data-ai-hint="product thumbnail"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs">{product.id}</span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard(product.id)}>
-                      <Copy className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  ${new Intl.NumberFormat("es-AR").format(product.price)}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleOpenForm(product)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive" onClick={() => handleOpenDeleteAlert(product)}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {products.length > 0 ? (
+                products.map((product) => (
+                <TableRow key={product.id}>
+                    <TableCell className="hidden sm:table-cell">
+                    <Image
+                        alt={product.name}
+                        className="aspect-square rounded-md object-cover"
+                        height="64"
+                        src={product.imageUrls[0]}
+                        width="64"
+                        data-ai-hint="product thumbnail"
+                    />
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                    <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs">{product.id}</span>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard(product.id)}>
+                        <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                    </div>
+                    </TableCell>
+                    <TableCell>
+                    ${new Intl.NumberFormat("es-AR").format(product.price)}
+                    </TableCell>
+                    <TableCell>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => handleOpenForm(product)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleOpenDeleteAlert(product)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                        </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    </TableCell>
+                </TableRow>
+                ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                        No se encontraron productos.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
