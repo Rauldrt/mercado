@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
+import CategoryCarousel from '@/components/products/category-carousel';
 
 function AdminProductsPage() {
   const { user, isAuthenticating } = useAuth();
@@ -19,6 +20,7 @@ function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   useEffect(() => {
     if (!isAuthenticating && !user) {
@@ -40,6 +42,16 @@ function AdminProductsPage() {
     };
     fetchProducts();
   }, []);
+
+  const categories = [...new Set(products.map(p => p.category))];
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(prev => prev === category ? '' : category);
+  };
+  
+  const filteredProducts = selectedCategory
+    ? products.filter(p => p.category === selectedCategory)
+    : products;
 
   if (isAuthenticating || !user || loading) {
     return (
@@ -67,10 +79,20 @@ function AdminProductsPage() {
           </Button>
         </div>
         
-        {products.length > 0 ? (
-          <ProductGrid products={products} />
+        {categories.length > 0 && (
+          <div className="mb-8">
+            <CategoryCarousel
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={handleCategorySelect}
+            />
+          </div>
+        )}
+        
+        {filteredProducts.length > 0 ? (
+          <ProductGrid products={filteredProducts} />
         ) : (
-          <p>No se encontraron productos.</p>
+          <p>No se encontraron productos para la categoría seleccionada.</p>
         )}
       </div>
   )
