@@ -64,6 +64,12 @@ const nextConfig = {
         hostname: 'encrypted-tbn0.gstatic.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'statics.dinoonline.com.ar',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
