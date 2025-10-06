@@ -95,6 +95,12 @@ const nextConfig = {
         hostname: 'images.pricely.ar',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ardiaprod.vtexassets.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
