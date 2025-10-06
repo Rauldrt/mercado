@@ -125,6 +125,12 @@ const nextConfig = {
         hostname: 'ss-static-001.esmsv.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pastasdonalola.com.ar',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
