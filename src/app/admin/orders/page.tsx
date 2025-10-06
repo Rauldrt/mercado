@@ -3,11 +3,11 @@
 
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Loader2, Search, Calendar as CalendarIcon } from "lucide-react";
 import AdminOrdersTable from '@/components/admin/orders-table';
-import { getCustomers } from '@/lib/firebase';
-import type { Customer, CartItem } from '@/lib/types';
+import { getCustomers, updateCustomerOrders } from '@/lib/firebase';
+import type { Customer, Order as PurchaseOrder } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,13 +15,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
-type Order = {
-    orderId: string;
-    date: string;
-    total: number;
-    items: CartItem[];
-    orderComment?: string;
+export type Order = PurchaseOrder & {
     customerName: string;
     customerId: string;
 }
@@ -33,16 +29,9 @@ function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (!isAuthenticating && !user) {
-      router.push('/login');
-    } else if (user) {
-      fetchOrders();
-    }
-  }, [user, isAuthenticating, router]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const customers = await getCustomers();
@@ -65,7 +54,38 @@ function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticating && !user) {
+      router.push('/login');
+    } else if (user) {
+      fetchOrders();
+    }
+  }, [user, isAuthenticating, router, fetchOrders]);
+
+  const handleOrderUpdate = async (customerId: string, orderId: string, updates: Partial<PurchaseOrder>) => {
+    try {
+        await updateCustomerOrders(customerId, orderId, updates);
+        toast({ title: "Pedido Actualizado", description: "El estado del pedido ha sido actualizado." });
+        await fetchOrders();
+    } catch (error) {
+        console.error("Failed to update order:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar el pedido." });
+    }
   };
+
+  const handleOrderDelete = async (customerId: string, orderId: string) => {
+     try {
+        await updateCustomerOrders(customerId, orderId, null); // Sending null indicates deletion
+        toast({ title: "Pedido Eliminado", description: "El pedido ha sido eliminado permanentemente." });
+        await fetchOrders();
+    } catch (error) {
+        console.error("Failed to delete order:", error);
+        toast({ variant: "destructive", title: "Error", description: "No se pudo eliminar el pedido." });
+    }
+  }
+
 
   const filteredOrders = useMemo(() => {
     let orders = allOrders;
@@ -167,7 +187,11 @@ function AdminOrdersPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         ) : (
-             <AdminOrdersTable orders={filteredOrders} />
+             <AdminOrdersTable
+                orders={filteredOrders}
+                onOrderUpdate={handleOrderUpdate}
+                onOrderDelete={handleOrderDelete}
+             />
         )}
       </div>
   )

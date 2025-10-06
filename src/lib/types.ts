@@ -21,6 +21,15 @@ export type CartItem = {
   unitPrice: number; // The price of one item (either a single unit or a whole bulk) at the time of adding to cart
 };
 
+export type Order = {
+  orderId: string;
+  date: string;
+  total: number;
+  items: CartItem[];
+  status: 'pendiente' | 'completado' | 'cancelado';
+  orderComment?: string;
+};
+
 export type Customer = {
   id: string;
   userId?: string; // Link to Firebase Auth user
@@ -32,13 +41,7 @@ export type Customer = {
   zip: string;
   phoneNumber?: string;
   gpsLocation?: string;
-  purchaseHistory: {
-    orderId: string;
-    date: string;
-    total: number;
-    items: CartItem[];
-    orderComment?: string;
-  }[];
+  purchaseHistory: Order[];
 };
 
 export type Promotion = {

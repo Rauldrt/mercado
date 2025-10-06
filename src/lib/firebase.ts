@@ -1,8 +1,9 @@
 
+
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import type { Product, Promotion, Customer } from './types';
+import type { Product, Promotion, Customer, Order } from './types';
 
 
 const firebaseConfig = {
@@ -154,6 +155,34 @@ export const updateCustomer = async (id: string, customerUpdate: Partial<Omit<Cu
 export const deleteCustomer = async (id: string): Promise<void> => {
     const docRef = doc(db, 'customers', id);
     await deleteDoc(docRef);
+}
+
+// New function to update or delete orders within a customer's purchase history
+export const updateCustomerOrders = async (customerId: string, orderId: string, orderUpdate: Partial<Order> | null): Promise<void> => {
+    const customerRef = doc(db, 'customers', customerId);
+    const customerSnap = await getDoc(customerRef);
+
+    if (!customerSnap.exists()) {
+        throw new Error("Customer not found");
+    }
+
+    const customerData = customerSnap.data() as Customer;
+    const purchaseHistory = customerData.purchaseHistory || [];
+
+    let updatedHistory;
+
+    if (orderUpdate === null) { // Deletion
+        updatedHistory = purchaseHistory.filter(order => order.orderId !== orderId);
+    } else { // Update
+        updatedHistory = purchaseHistory.map(order => {
+            if (order.orderId === orderId) {
+                return { ...order, ...orderUpdate };
+            }
+            return order;
+        });
+    }
+
+    await updateDoc(customerRef, { purchaseHistory: updatedHistory });
 }
 
 

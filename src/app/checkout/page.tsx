@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useCart } from '@/contexts/cart-context';
@@ -15,7 +16,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { updateCustomer, getCustomerById } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
-import type { Customer, CartItem } from '@/lib/types';
+import type { Customer, CartItem, Order } from '@/lib/types';
 import type { z } from 'zod';
 import type { checkoutFormSchema } from '@/components/checkout/checkout-form';
 
@@ -65,11 +66,12 @@ export default function CheckoutPage() {
       setCustomerInfo(selectedCustomer);
 
       // Append the new order to the customer's purchase history
-      const newPurchase = {
+      const newPurchase: Order = {
         orderId: orderId,
         date: orderDate,
         total: currentTotalPrice + shippingCost,
-        items: currentCartItems, // Ensure items are included
+        items: currentCartItems,
+        status: 'pendiente',
         orderComment: currentOrderComment,
       };
 
