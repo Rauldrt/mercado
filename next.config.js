@@ -107,6 +107,12 @@ const nextConfig = {
         hostname: 'distribuidorachichi.com.ar',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'http2.mlstatic.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
