@@ -4,7 +4,7 @@
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Loader2, Search, Calendar as CalendarIcon, Filter } from "lucide-react";
+import { Loader2, Search, Calendar as CalendarIcon, Filter, FileDown } from "lucide-react";
 import AdminOrdersTable from '@/components/admin/orders-table';
 import { getCustomers, updateCustomerOrders } from '@/lib/firebase';
 import type { Customer, Order as PurchaseOrder } from '@/lib/types';
@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Papa from 'papaparse';
 
 export type Order = PurchaseOrder & {
     customerName: string;
@@ -88,6 +89,45 @@ function AdminOrdersPage() {
     }
   }
 
+  const handleExportToCsv = () => {
+    if (filteredOrders.length === 0) {
+      toast({
+        title: "No hay pedidos para exportar",
+        description: "La lista de pedidos filtrados está vacía.",
+      });
+      return;
+    }
+
+    const dataForCsv = filteredOrders.flatMap(order => 
+        order.items.map(item => ({
+            'ID Pedido': order.orderId,
+            'Fecha': new Date(order.date).toLocaleString('es-AR'),
+            'Estado': order.status || 'pendiente',
+            'Cliente': order.customerName,
+            'ID Cliente': order.customerId,
+            'Comentario Pedido': order.orderComment || '',
+            'ID Producto': item.product.id,
+            'Producto': item.product.name,
+            'Cantidad': item.quantity,
+            'Presentación': item.presentation === 'bulk' ? 'Bulto' : 'Unidad',
+            'Precio Unitario (ARS)': item.unitPrice,
+            'Total Artículo (ARS)': item.unitPrice * item.quantity,
+            'Total Pedido (ARS)': order.total,
+        }))
+    );
+    
+    const csv = Papa.unparse(dataForCsv);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'pedidos.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
 
   const filteredOrders = useMemo(() => {
     let orders = allOrders;
@@ -153,7 +193,7 @@ function AdminOrdersPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
                 <Popover>
                     <PopoverTrigger asChild>
                     <Button
@@ -199,6 +239,10 @@ function AdminOrdersPage() {
                         <SelectItem value="cancelado">Cancelado</SelectItem>
                     </SelectContent>
                 </Select>
+                 <Button variant="outline" onClick={handleExportToCsv}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Exportar a CSV
+                </Button>
             </div>
         </div>
 
