@@ -113,6 +113,12 @@ const nextConfig = {
         hostname: 'http2.mlstatic.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.congeladosdelplata.com.ar',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
