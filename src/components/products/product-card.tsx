@@ -172,7 +172,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.promotionTag && (
               <Badge 
                 variant="destructive" 
-                className="absolute top-2 right-2 z-10"
+                className="absolute top-2 left-2 z-10"
               >
                 {product.promotionTag}
               </Badge>
@@ -180,7 +180,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Button 
                 size="icon" 
                 onClick={handleWishlistToggle}
-                className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-300"
+                className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-300"
             >
               <Heart className={cn("h-4 w-4", isInWishlist(product.id) ? "fill-red-500 text-red-500" : "fill-transparent text-white")} />
             </Button>
