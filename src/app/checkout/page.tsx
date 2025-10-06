@@ -107,7 +107,7 @@ export default function CheckoutPage() {
     const finalTotalForShare = orderedTotalPrice + shippingCost;
     let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n`;
     orderedItems.forEach(item => {
-      message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
+      message += `*${item.product.name}* (${item.quantity} ${item.presentation === 'bulk' ? 'Bulto(s)' : 'Unidad(es)'}) - $${new Intl.NumberFormat('es-AR').format(item.unitPrice * item.quantity)}\n`;
     });
     if (orderComment) {
       message += `\n_Comentario del pedido: ${orderComment}_\n`;
@@ -198,10 +198,11 @@ export default function CheckoutPage() {
                       <tr key={item.product.id}>
                           <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>
                             {item.product.name}
+                            <span style={{ color: '#666', fontSize: '12px' }}> ({item.presentation === 'bulk' ? 'Bulto' : 'Unidad'})</span>
                           </td>
                           <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #EEE' }}>{item.quantity}</td>
-                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price)}</td>
-                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</td>
+                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.unitPrice)}</td>
+                          <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.unitPrice * item.quantity)}</td>
                       </tr>
                   ))}
               </tbody>
@@ -240,7 +241,7 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {itemsToDisplay.map(item => (
-                        <div key={item.product.id} className="space-y-3">
+                        <div key={`${item.product.id}-${item.presentation}`} className="space-y-3">
                             <div className="flex items-start gap-4">
                                 <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
                                     <Image 
@@ -254,6 +255,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="flex-grow space-y-1">
                                     <p className="font-medium">{item.product.name}</p>
+                                    <p className="text-sm text-muted-foreground capitalize">Presentación: {item.presentation === 'bulk' ? 'Bulto' : 'Unidad'}</p>
                                     {!showPostOrderActions && cartCount > 0 && (
                                     <div className="flex items-center gap-2">
                                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
@@ -269,7 +271,7 @@ export default function CheckoutPage() {
                                         <p className="text-sm text-muted-foreground">Cantidad: {item.quantity}</p>
                                     )}
                                 </div>
-                                <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
+                                <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.unitPrice * item.quantity)}</p>
                             </div>
                         </div>
                     ))}
@@ -318,5 +320,7 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
 
     

@@ -8,13 +8,13 @@ interface CartContextType {
   cartItems: CartItem[];
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
-  addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Product, quantity: number, presentation: 'unit' | 'bulk') => void;
+  removeFromCart: (productId: string, presentation: 'unit' | 'bulk') => void;
+  updateQuantity: (productId: string, quantity: number, presentation: 'unit' | 'bulk') => void;
   clearCart: () => void;
   cartCount: number;
   totalPrice: number;
-  getItemQuantity: (productId: string) => number;
+  getItemQuantity: (productId: string, presentation: 'unit' | 'bulk') => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -50,38 +50,42 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [cartItems]);
 
-  const addToCart = useCallback((product: Product, quantity = 1) => {
+  const addToCart = useCallback((product: Product, quantity = 1, presentation: 'unit' | 'bulk') => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.product.id === product.id);
+      const existingItem = prevItems.find(item => item.product.id === product.id && item.presentation === presentation);
       if (existingItem) {
         return prevItems.map(item =>
-          item.product.id === product.id
+          item.product.id === product.id && item.presentation === presentation
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prevItems, { product, quantity }];
+      
+      const units = presentation === 'bulk' ? (product.unitsPerBulk || 1) : 1;
+      const itemPrice = product.price * units;
+      
+      return [...prevItems, { product, quantity, presentation, unitPrice: itemPrice }];
     });
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId));
+  const removeFromCart = useCallback((productId: string, presentation: 'unit' | 'bulk') => {
+    setCartItems(prevItems => prevItems.filter(item => !(item.product.id === productId && item.presentation === presentation)));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, presentation: 'unit' | 'bulk') => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, presentation);
     } else {
       setCartItems(prevItems => {
         return prevItems.map(item =>
-          item.product.id === productId ? { ...item, quantity } : item
+          item.product.id === productId && item.presentation === presentation ? { ...item, quantity } : item
         );
       });
     }
   }, [removeFromCart]);
 
-  const getItemQuantity = useCallback((productId: string) => {
-    const item = cartItems.find(item => item.product.id === productId);
+  const getItemQuantity = useCallback((productId: string, presentation: 'unit' | 'bulk') => {
+    const item = cartItems.find(item => item.product.id === productId && item.presentation === presentation);
     return item ? item.quantity : 0;
   }, [cartItems]);
 
@@ -91,7 +95,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-  const totalPrice = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
 
   const value = {
     cartItems,
@@ -108,3 +112,5 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
+
+    

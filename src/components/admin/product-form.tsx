@@ -27,6 +27,7 @@ const formSchema = z.object({
   price: z.coerce.number().positive({ message: 'El precio debe ser un número positivo.' }),
   category: z.string().min(2, { message: 'La categoría es requerida.' }),
   stock: z.coerce.number().int().min(0, { message: 'El stock no puede ser negativo.' }),
+  unitsPerBulk: z.coerce.number().int().min(1, { message: 'Las unidades por bulto deben ser al menos 1.' }).optional(),
   imageUrls: z.array(z.object({ value: z.string().url({ message: 'Por favor, ingrese una URL válida.' }) })).min(1, 'Se requiere al menos una imagen.'),
   specifications: z.array(z.object({
     key: z.string().min(1, 'La clave no puede estar vacía.'),
@@ -63,6 +64,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       price: product?.price || 0,
       category: product?.category || '',
       stock: product?.stock || 0,
+      unitsPerBulk: product?.unitsPerBulk || 1,
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
       promotionTag: product?.promotionTag || '',
@@ -111,7 +113,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Precio</FormLabel>
+                <FormLabel>Precio (por unidad)</FormLabel>
                 <FormControl><Input type="number" placeholder="89999.99" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -129,7 +131,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FormField
             control={form.control}
             name="category"
@@ -146,8 +148,20 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
             name="stock"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock</FormLabel>
+                <FormLabel>Stock (en unidades)</FormLabel>
                 <FormControl><Input type="number" placeholder="50" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="unitsPerBulk"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Unidades por Bulto</FormLabel>
+                <FormControl><Input type="number" placeholder="12" {...field} /></FormControl>
+                <FormDescription>Si no se vende por bulto, dejar en 1.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -249,3 +263,5 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
     </Form>
   );
 }
+
+    

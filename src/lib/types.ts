@@ -3,19 +3,22 @@ export type Product = {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // This should always be the price per single unit
+  unitsPerBulk?: number; // How many units are in a bulk package
   imageUrls: string[];
   category: string;
   specifications: Record<string, string>;
-  stock: number;
+  stock: number; // Stock should be in single units
   vendor: string;
-  vendorId: string; // Add vendorId to associate product with a user
-  promotionTag?: string; // Optional tag for sales, e.g., "25% OFF"
+  vendorId: string;
+  promotionTag?: string;
 };
 
 export type CartItem = {
   product: Product;
-  quantity: number;
+  quantity: number; // Number of units or bulks
+  presentation: 'unit' | 'bulk';
+  unitPrice: number; // The price of one item (either a single unit or a whole bulk) at the time of adding to cart
 };
 
 export type Customer = {
@@ -46,3 +49,5 @@ export type Promotion = {
   imageHint: string;
   productId: string; // Link directly to a product
 };
+
+    
