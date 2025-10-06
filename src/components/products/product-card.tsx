@@ -71,6 +71,14 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const renderCartControls = () => {
     if (quantityInCartUnit === 0 && quantityInCartBulk === 0) {
+      if (!hasBulkOption) {
+        return (
+            <Button className="flex-grow" onClick={() => handleAddToCart('unit')}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Agregar
+            </Button>
+        );
+      }
       return (
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
@@ -127,7 +135,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 </div>
             )}
-             {(quantityInCartUnit === 0 || quantityInCartBulk === 0) && (
+             {((quantityInCartUnit === 0 && hasBulkOption) || (quantityInCartBulk === 0 && hasBulkOption)) && (
                  <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                     <PopoverTrigger asChild>
                         <Button variant="outline" size="sm" className="w-full">
@@ -211,5 +219,3 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
-
-    
