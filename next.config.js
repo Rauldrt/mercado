@@ -70,6 +70,12 @@ const nextConfig = {
         hostname: 'statics.dinoonline.com.ar',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'arjosimarprod.vtexassets.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
