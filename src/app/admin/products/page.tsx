@@ -62,6 +62,7 @@ function AdminProductsPage() {
     if (searchQuery) {
         const lowercasedQuery = searchQuery.toLowerCase();
         filtered = filtered.filter(p => 
+            p.id.toLowerCase().includes(lowercasedQuery) ||
             p.name.toLowerCase().includes(lowercasedQuery) ||
             p.category.toLowerCase().includes(lowercasedQuery) ||
             p.description.toLowerCase().includes(lowercasedQuery)
@@ -97,7 +98,7 @@ function AdminProductsPage() {
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
-                    placeholder="Buscar por nombre, categoría o descripción..."
+                    placeholder="Buscar por ID, nombre, categoría o descripción..."
                     className="pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
