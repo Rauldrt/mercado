@@ -141,6 +141,11 @@ export const addCustomer = async (customer: Omit<Customer, 'id'>): Promise<strin
     return docRef.id;
 }
 
+export const setCustomerWithId = async (id: string, customer: Partial<Omit<Customer, 'id'>>): Promise<void> => {
+    const docRef = doc(db, 'customers', id);
+    await setDoc(docRef, customer, { merge: true });
+}
+
 export const updateCustomer = async (id: string, customerUpdate: Partial<Omit<Customer, 'id'>>): Promise<void> => {
     const docRef = doc(db, 'customers', id);
     await updateDoc(docRef, customerUpdate);

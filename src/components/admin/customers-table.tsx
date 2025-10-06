@@ -125,7 +125,7 @@ export default function AdminCustomersTable() {
       <div className="flex justify-end mb-4">
         <Button onClick={() => handleOpenForm(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Añadir Cliente
+            Añadir Cliente Manualmente
         </Button>
       </div>
       <div className="rounded-md border">
