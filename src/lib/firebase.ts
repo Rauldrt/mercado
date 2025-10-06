@@ -1,7 +1,7 @@
 
 
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where, setDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, where, setDoc, enableMultiTabIndexedDbPersistence, Firestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import type { Product, Promotion, Customer, Order } from './types';
 
@@ -18,13 +18,34 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+
+let db: Firestore;
+
+const getFirestoreInstance = async () => {
+    if (db) {
+        return db;
+    }
+    
+    const firestore = getFirestore(app);
+    
+    try {
+        await enableMultiTabIndexedDbPersistence(firestore);
+        console.log("Firebase Offline Persistence enabled");
+    } catch (err: any) {
+        if (err.code === 'failed-precondition') {
+            console.warn("Firebase Offline Persistence could not be enabled: Multiple tabs open.");
+        } else if (err.code === 'unimplemented') {
+            console.warn("Firebase Offline Persistence is not available in this browser.");
+        }
+    }
+    
+    db = firestore;
+    return db;
+};
+
+
 const auth = getAuth(app);
 
-const productsCollection = collection(db, 'products');
-const promotionsCollection = collection(db, 'promotions');
-const customersCollection = collection(db, 'customers');
-const settingsCollection = collection(db, 'settings');
 
 // Helper to convert Firestore doc to a given type
 const docToType = <T>(doc: any): T => {
@@ -37,12 +58,15 @@ const docToType = <T>(doc: any): T => {
 
 // Product Operations
 export const getProducts = async (): Promise<Product[]> => {
+    const firestore = await getFirestoreInstance();
+    const productsCollection = collection(firestore, 'products');
     const snapshot = await getDocs(productsCollection);
     return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
-    const docRef = doc(db, 'products', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'products', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
         return docToType<Product>(docSnap);
@@ -51,24 +75,31 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 }
 
 export const getProductsByVendor = async (vendorName: string): Promise<Product[]> => {
+    const firestore = await getFirestoreInstance();
+    const productsCollection = collection(firestore, 'products');
     const q = query(productsCollection, where("vendor", "==", vendorName));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
 export const getProductsByVendorId = async (vendorId: string): Promise<Product[]> => {
+    const firestore = await getFirestoreInstance();
+    const productsCollection = collection(firestore, 'products');
     const q = query(productsCollection, where("vendorId", "==", vendorId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => docToType<Product>(doc));
 }
 
 export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> => {
+    const firestore = await getFirestoreInstance();
+    const productsCollection = collection(firestore, 'products');
     const docRef = await addDoc(productsCollection, product);
     return docRef.id;
 }
 
 export const setProductWithId = async (id: string, product: Partial<Omit<Product, 'id'>>): Promise<void> => {
-    const docRef = doc(db, 'products', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'products', id);
     // Usamos merge: true para crear el producto si no existe, o para actualizarlo si ya existe.
     // Esto asegura que no se sobrescriban campos que no están en el CSV (como imageUrls, etc.).
     await setDoc(docRef, product, { merge: true });
@@ -76,45 +107,57 @@ export const setProductWithId = async (id: string, product: Partial<Omit<Product
 
 
 export const updateProduct = async (id: string, productUpdate: Partial<Omit<Product, 'id'>>): Promise<void> => {
-    const docRef = doc(db, 'products', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'products', id);
     await updateDoc(docRef, productUpdate);
 }
 
 export const deleteProduct = async (id: string): Promise<void> => {
-    const docRef = doc(db, 'products', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'products', id);
     await deleteDoc(docRef);
 }
 
 // Promotion Operations
 export const getPromotions = async (): Promise<Promotion[]> => {
+    const firestore = await getFirestoreInstance();
+    const promotionsCollection = collection(firestore, 'promotions');
     const snapshot = await getDocs(promotionsCollection);
     return snapshot.docs.map(doc => docToType<Promotion>(doc));
 }
 
 export const addPromotion = async (promotion: Omit<Promotion, 'id'>): Promise<string> => {
+    const firestore = await getFirestoreInstance();
+    const promotionsCollection = collection(firestore, 'promotions');
     const docRef = await addDoc(promotionsCollection, promotion);
     return docRef.id;
 }
 
 export const updatePromotion = async (id: string, promotionUpdate: Partial<Omit<Promotion, 'id'>>): Promise<void> => {
-    const docRef = doc(db, 'promotions', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'promotions', id);
     await updateDoc(docRef, promotionUpdate);
 }
 
 export const deletePromotion = async (id: string): Promise<void> => {
-    const docRef = doc(db, 'promotions', id);
+    const firestore = await getFirestoreInstance();
+    const docRef = doc(firestore, 'promotions', id);
     await deleteDoc(docRef);
 }
 
 // Customer Operations
 export const getCustomers = async (userId: string): Promise<Customer[]> => {
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
     const q = query(customersCollection, where("userId", "==", userId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => docToType<Customer>(doc));
 }
 
 export const getCustomerById = async (id: string): Promise<Customer | undefined> => {
-    const docRef = doc(db, 'customers', id);
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
+    const docRef = doc(customersCollection, id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
         return docToType<Customer>(docSnap);
@@ -124,28 +167,38 @@ export const getCustomerById = async (id: string): Promise<Customer | undefined>
 
 
 export const addCustomer = async (customer: Omit<Customer, 'id'>): Promise<string> => {
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
     const docRef = await addDoc(customersCollection, customer);
     return docRef.id;
 }
 
 export const setCustomerWithId = async (id: string, customer: Partial<Omit<Customer, 'id'>>): Promise<void> => {
-    const docRef = doc(db, 'customers', id);
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
+    const docRef = doc(customersCollection, id);
     await setDoc(docRef, customer, { merge: true });
 }
 
 export const updateCustomer = async (id: string, customerUpdate: Partial<Omit<Customer, 'id'>>): Promise<void> => {
-    const docRef = doc(db, 'customers', id);
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
+    const docRef = doc(customersCollection, id);
     await updateDoc(docRef, customerUpdate);
 }
 
 export const deleteCustomer = async (id: string): Promise<void> => {
-    const docRef = doc(db, 'customers', id);
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
+    const docRef = doc(customersCollection, id);
     await deleteDoc(docRef);
 }
 
 // New function to update or delete orders within a customer's purchase history
 export const updateCustomerOrders = async (customerId: string, orderId: string, orderUpdate: Partial<Order> | null): Promise<void> => {
-    const customerRef = doc(db, 'customers', customerId);
+    const firestore = await getFirestoreInstance();
+    const customersCollection = collection(firestore, 'customers');
+    const customerRef = doc(customersCollection, customerId);
     const customerSnap = await getDoc(customerRef);
 
     if (!customerSnap.exists()) {
@@ -174,7 +227,9 @@ export const updateCustomerOrders = async (customerId: string, orderId: string, 
 
 // Settings Operations
 export const getSetting = async (settingId: string): Promise<string | null> => {
-    const docRef = doc(db, 'settings', settingId);
+    const firestore = await getFirestoreInstance();
+    const settingsCollection = collection(firestore, 'settings');
+    const docRef = doc(settingsCollection, settingId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
         return docSnap.data().value;
@@ -183,7 +238,9 @@ export const getSetting = async (settingId: string): Promise<string | null> => {
 }
 
 export const updateSetting = async (settingId: string, value: string): Promise<void> => {
-    const docRef = doc(db, 'settings', settingId);
+    const firestore = await getFirestoreInstance();
+    const settingsCollection = collection(firestore, 'settings');
+    const docRef = doc(settingsCollection, settingId);
     // Use setDoc with merge: true to create the document if it doesn't exist, or update it if it does.
     await setDoc(docRef, { value }, { merge: true });
 }

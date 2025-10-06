@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useCart } from '@/contexts/cart-context';
@@ -33,12 +34,12 @@ export default function CheckoutPage() {
 
   const shippingCost = 0; // Removed shipping cost as requested
   
-  const handleIncreaseQuantity = (productId: string, currentQuantity: number) => {
-    updateQuantity(productId, currentQuantity + 1, 'unit'); // Assuming unit, needs context
+  const handleIncreaseQuantity = (productId: string, presentation: 'unit' | 'bulk', currentQuantity: number) => {
+    updateQuantity(productId, currentQuantity + 1, presentation);
   };
   
-  const handleDecreaseQuantity = (productId: string, currentQuantity: number) => {
-    updateQuantity(productId, currentQuantity - 1, 'unit'); // Assuming unit, needs context
+  const handleDecreaseQuantity = (productId: string, presentation: 'unit' | 'bulk', currentQuantity: number) => {
+    updateQuantity(productId, currentQuantity - 1, presentation);
   };
   
   const handleOrderSuccess = async (data: z.infer<typeof checkoutFormSchema>) => {
@@ -272,11 +273,11 @@ export default function CheckoutPage() {
                                     <p className="text-sm text-muted-foreground capitalize">Presentación: {item.presentation === 'bulk' ? 'Bulto' : 'Unidad'}</p>
                                     {!showPostOrderActions && cartCount > 0 && (
                                     <div className="flex items-center gap-2">
-                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.quantity)}>
+                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDecreaseQuantity(item.product.id, item.presentation, item.quantity)}>
                                             <Minus className="h-3 w-3" />
                                         </Button>
                                         <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
-                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleIncreaseQuantity(item.product.id, item.quantity)}>
+                                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleIncreaseQuantity(item.product.id, item.presentation, item.quantity)}>
                                             <Plus className="h-3 w-3" />
                                         </Button>
                                     </div>
