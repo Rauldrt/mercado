@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   // State to hold the order details at the moment of purchase
   const [orderedItems, setOrderedItems] = useState<CartItem[]>([]);
   const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
+  const [orderDetailsForPdf, setOrderDetailsForPdf] = useState<{orderId: string, date: string} | null>(null);
 
   const shippingCost = 0; // Removed shipping cost as requested
   
@@ -41,8 +42,12 @@ export default function CheckoutPage() {
   };
   
   const handleOrderSuccess = async (data: z.infer<typeof checkoutFormSchema>) => {
+    const orderId = uuidv4();
+    const orderDate = new Date().toISOString();
+    
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
+    setOrderDetailsForPdf({ orderId, date: orderDate });
     
     try {
       // Fetch the selected customer to get their full data
@@ -56,8 +61,8 @@ export default function CheckoutPage() {
 
       // Append the new order to the customer's purchase history
       const newPurchase = {
-        orderId: uuidv4(),
-        date: new Date().toISOString(),
+        orderId: orderId,
+        date: orderDate,
         total: totalPrice + shippingCost,
         items: cartItems,
       };
@@ -145,11 +150,13 @@ export default function CheckoutPage() {
                       <p style={{ margin: '0' }}>soporte@mercadoargentino.online</p>
                   </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                  <h2 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0' }}>Resumen de Pedido</h2>
-                  <p style={{ margin: '0' }}>Pedido #: {(Math.random() * 100000).toFixed(0)}</p>
-                  <p style={{ margin: '0' }}>Fecha: {new Date().toLocaleDateString('es-AR')}</p>
-              </div>
+              {orderDetailsForPdf && (
+                <div style={{ textAlign: 'right' }}>
+                    <h2 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0' }}>Resumen de Pedido</h2>
+                    <p style={{ margin: '0' }}>Pedido #: {orderDetailsForPdf.orderId.slice(0, 8)}</p>
+                    <p style={{ margin: '0' }}>Fecha: {new Date(orderDetailsForPdf.date).toLocaleDateString('es-AR')}</p>
+                </div>
+              )}
           </div>
           {customerInfo && (
               <div style={{ marginBottom: '30px', borderBottom: '2px solid #EEE', paddingBottom: '20px' }}>
@@ -302,3 +309,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
