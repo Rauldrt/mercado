@@ -12,6 +12,7 @@ export type Product = {
   vendor: string;
   vendorId: string;
   promotionTag?: string;
+  isVisible?: boolean;
 };
 
 export type CartItem = {

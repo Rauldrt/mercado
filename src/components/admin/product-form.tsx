@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'El nombre debe tener al menos 3 caracteres.' }),
@@ -34,6 +35,7 @@ const formSchema = z.object({
     value: z.string().min(1, 'El valor no puede estar vacío.'),
   })),
   promotionTag: z.string().optional(),
+  isVisible: z.boolean().default(true),
 });
 
 interface ProductFormProps {
@@ -68,6 +70,7 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
       imageUrls: product?.imageUrls.map(url => ({ value: url })) || [{ value: '' }],
       specifications: product ? specsToArray(product.specifications) : [{ key: '', value: '' }],
       promotionTag: product?.promotionTag || '',
+      isVisible: product?.isVisible ?? true,
     },
   });
 
@@ -96,6 +99,26 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="isVisible"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Visible en la App</FormLabel>
+                <FormDescription>
+                  Si está desactivado, el producto no aparecerá en la página para crear pedidos.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -263,5 +286,3 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
     </Form>
   );
 }
-
-    

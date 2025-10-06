@@ -36,7 +36,9 @@ function AdminProductsPage() {
       setLoading(true);
       try {
         const fetchedProducts = await getProducts();
-        setProducts(fetchedProducts);
+        // Filter for visible products for this page
+        const visibleProducts = fetchedProducts.filter(p => p.isVisible ?? true);
+        setProducts(visibleProducts);
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {

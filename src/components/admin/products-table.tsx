@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import type { Product } from "@/lib/types";
 import {
   Table,
@@ -34,6 +34,8 @@ import Image from "next/image";
 import ProductForm from "./product-form";
 import { useToast } from "@/hooks/use-toast";
 import { addProduct, updateProduct, deleteProduct } from "@/lib/firebase";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface AdminProductsTableProps {
     products: Product[];
@@ -101,6 +103,21 @@ export default function AdminProductsTable({ products, onProductUpdate }: AdminP
        }
     }
   };
+  
+  const handleVisibilityToggle = async (product: Product) => {
+    try {
+        const newVisibility = !(product.isVisible ?? true);
+        await updateProduct(product.id, { isVisible: newVisibility });
+        toast({
+            title: "Visibilidad Actualizada",
+            description: `${product.name} ahora está ${newVisibility ? 'visible' : 'oculto'} en los pedidos.`
+        });
+        onProductUpdate();
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo cambiar la visibilidad." });
+        console.error("Failed to toggle visibility:", error);
+    }
+  }
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -123,7 +140,7 @@ export default function AdminProductsTable({ products, onProductUpdate }: AdminP
                 Imagen
               </TableHead>
               <TableHead>Nombre</TableHead>
-              <TableHead className="hidden md:table-cell">ID de Producto</TableHead>
+              <TableHead>Visible en Pedidos</TableHead>
               <TableHead>Precio</TableHead>
               <TableHead>
                 <span className="sr-only">Acciones</span>
@@ -145,13 +162,13 @@ export default function AdminProductsTable({ products, onProductUpdate }: AdminP
                     />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                    <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs">{product.id}</span>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyToClipboard(product.id)}>
-                        <Copy className="h-3.5 w-3.5" />
-                        </Button>
-                    </div>
+                    <TableCell>
+                        <Switch
+                            id={`visibility-${product.id}`}
+                            checked={product.isVisible ?? true}
+                            onCheckedChange={() => handleVisibilityToggle(product)}
+                            aria-label="Visibilidad del producto"
+                        />
                     </TableCell>
                     <TableCell>
                     ${new Intl.NumberFormat("es-AR").format(product.price)}
