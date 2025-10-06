@@ -40,7 +40,7 @@ const productRowSchema = z.object({
   price: z.coerce.number().positive({ message: 'El "price" debe ser un número positivo.' }),
   description: z.string().min(1, { message: 'La "description" es requerida.' }),
   category: z.string().min(1, { message: 'La "category" es requerida.' }),
-  unitsPerBulk: z.coerce.number().int().min(1, { message: 'El campo "unitsPerBulk" debe ser al menos 1.'}),
+  unitsPerBulk: z.coerce.number().min(1, { message: 'El campo "unitsPerBulk" debe ser al menos 1.'}),
 });
 
 
@@ -96,6 +96,9 @@ export default function ProductCsvImporter({ onImportSuccess }: ProductCsvImport
           // Pre-process price to handle comma decimal separators
           if (row.price && typeof row.price === 'string') {
             row.price = row.price.replace(',', '.');
+          }
+          if (row.unitsPerBulk && typeof row.unitsPerBulk === 'string') {
+            row.unitsPerBulk = row.unitsPerBulk.replace(',', '.');
           }
 
           const parsedRow = productRowSchema.parse(row);
