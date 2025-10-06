@@ -13,13 +13,6 @@ interface MainNavProps {
 export default function MainNav({ vertical = false, onClose }: MainNavProps) {
   const pathname = usePathname();
 
-  const navClass = cn(
-    'flex items-center space-x-4 lg:space-x-6',
-    {
-      'flex-col space-x-0 space-y-4 items-start': vertical,
-    }
-  );
-
   const linkClass = (href: string) => cn(
     "text-sm font-medium transition-colors hover:text-primary",
     pathname.startsWith(href) ? "text-primary" : "text-muted-foreground",
@@ -41,6 +34,9 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
       </Link>
       <Link href="/admin/products" className={linkClass("/admin/products")} onClick={handleLinkClick}>
         Nuevo Pedido
+      </Link>
+       <Link href="/admin/orders" className={linkClass("/admin/orders")} onClick={handleLinkClick}>
+        Pedidos
       </Link>
       <Link href="/admin/catalog" className={linkClass("/admin/catalog")} onClick={handleLinkClick}>
         Catálogo

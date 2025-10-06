@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, Users, Package, FilePlus, Plus, X } from 'lucide-react';
+import { Home, Users, Package, FilePlus, Plus, X, ListOrdered } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/contexts/auth-context';
@@ -16,6 +16,7 @@ export default function MobileFabMenu() {
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/admin/customers', label: 'Clientes', icon: Users },
     { href: '/admin/products', label: 'Nuevo Pedido', icon: FilePlus },
+    { href: '/admin/orders', label: 'Pedidos', icon: ListOrdered },
     { href: '/admin/catalog', label: 'Catálogo', icon: Package },
   ];
   

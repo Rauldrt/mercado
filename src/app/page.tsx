@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Loader2, Users, FilePlus } from "lucide-react";
+import { Loader2, Users, FilePlus, ListOrdered } from "lucide-react";
 import Link from 'next/link';
 
 function HomePageContent() {
@@ -36,7 +36,7 @@ function HomePageContent() {
                 <p className="text-muted-foreground mt-2">Bienvenido, {user.email}. Gestiona tus clientes y pedidos desde aquí.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                  <Link href="/admin/customers" passHref>
                     <div className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent cursor-pointer transition-colors">
                         <div className="flex items-center gap-4">
@@ -59,6 +59,19 @@ function HomePageContent() {
                             <div>
                                 <h2 className="text-xl font-semibold font-headline">Cargar Pedido</h2>
                                 <p className="text-muted-foreground text-sm">Crear un nuevo pedido para un cliente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
+                <Link href="/admin/orders" passHref>
+                     <div className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent cursor-pointer transition-colors">
+                        <div className="flex items-center gap-4">
+                             <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                                <ListOrdered className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold font-headline">Ver Pedidos</h2>
+                                <p className="text-muted-foreground text-sm">Explorar el historial de pedidos.</p>
                             </div>
                         </div>
                     </div>
