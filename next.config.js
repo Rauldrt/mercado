@@ -101,6 +101,12 @@ const nextConfig = {
         hostname: 'ardiaprod.vtexassets.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'distribuidorachichi.com.ar',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
