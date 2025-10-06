@@ -90,21 +90,22 @@ function AdminProductsPage() {
         )}
 
         {cartCount > 0 && (
-             <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/90 backdrop-blur-sm border-t">
+             <div className="fixed bottom-4 right-24 md:right-4 z-50">
                 <Link href="/checkout" passHref>
-                    <div className="container mx-auto flex items-center justify-between h-full bg-primary text-primary-foreground rounded-lg p-4 shadow-lg cursor-pointer hover:bg-primary/90 transition-colors">
+                    <Button
+                        size="lg"
+                        className="h-14 rounded-full shadow-xl pl-5 pr-6"
+                    >
                         <div className="flex items-center gap-3">
-                             <ShoppingCart className="h-6 w-6" />
-                             <div className="flex flex-col">
-                                 <span className="font-semibold text-lg">{cartCount} {cartCount > 1 ? 'productos' : 'producto'}</span>
-                                 <span className="font-bold text-xl">${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
-                             </div>
+                            <ShoppingCart className="h-6 w-6" />
+                            <Separator orientation="vertical" className="h-6 bg-primary-foreground/20" />
+                            <div className="flex flex-col items-start">
+                                <span className="text-xs font-normal -mb-1">{cartCount} {cartCount > 1 ? 'productos' : 'producto'}</span>
+                                <span className="font-bold text-lg">${new Intl.NumberFormat('es-AR').format(totalPrice)}</span>
+                            </div>
+                            <ArrowRight className="h-5 w-5 ml-2" />
                         </div>
-                        <div className="flex items-center gap-2">
-                             <span className="font-semibold text-lg">Ver Pedido</span>
-                             <ArrowRight className="h-5 w-5" />
-                        </div>
-                    </div>
+                    </Button>
                 </Link>
             </div>
         )}
