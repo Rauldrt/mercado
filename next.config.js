@@ -40,6 +40,12 @@ const nextConfig = {
         hostname: 'dcdn-us.mitiendanube.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lacteosyatasto.com.ar',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
