@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect, useMemo } from 'react';
@@ -111,24 +110,31 @@ function AdminProductsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
-
+        </div>
+        
+        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 -mx-4 -mt-4 mb-8 pt-4 pb-4">
             {categories.length > 0 && (
-                <CategoryCarousel
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onCategorySelect={handleCategorySelect}
-                />
+                <div className="container mx-auto px-4">
+                    <CategoryCarousel
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onCategorySelect={handleCategorySelect}
+                    />
+                </div>
             )}
         </div>
         
-        {filteredProducts.length > 0 ? (
-          <ProductGrid products={filteredProducts} />
-        ) : (
-          <div className='text-center py-10'>
-             <p className='text-lg font-semibold'>No se encontraron productos</p>
-             <p className='text-muted-foreground mt-2'>Intenta ajustar tu búsqueda o filtros.</p>
-          </div>
-        )}
+        <div className="pt-4">
+            {filteredProducts.length > 0 ? (
+            <ProductGrid products={filteredProducts} />
+            ) : (
+            <div className='text-center py-10'>
+                <p className='text-lg font-semibold'>No se encontraron productos</p>
+                <p className='text-muted-foreground mt-2'>Intenta ajustar tu búsqueda o filtros.</p>
+            </div>
+            )}
+        </div>
+
 
         {cartCount > 0 && (
              <div className="fixed bottom-4 right-24 md:right-4 z-50">

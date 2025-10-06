@@ -1,6 +1,7 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
+import './sticky.css';
 import { Providers } from '@/components/providers';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';

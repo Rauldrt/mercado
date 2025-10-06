@@ -1,0 +1,4 @@
+/* Fix for carousel buttons inside a sticky container */
+.sticky .embla__button {
+    z-index: 1;
+}
