@@ -46,6 +46,12 @@ const nextConfig = {
         hostname: 'lacteosyatasto.com.ar',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'elnenearg.vtexassets.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
