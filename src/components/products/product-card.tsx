@@ -166,8 +166,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group">
-      <Link href={`/product/${product.id}`} className="block">
-        <CardHeader className="p-0">
+      <CardHeader className="p-0">
+        <Link href={`/product/${product.id}`} className="block">
           <div className="aspect-square relative overflow-hidden">
             {product.promotionTag && (
               <Badge 
@@ -177,6 +177,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {product.promotionTag}
               </Badge>
             )}
+            <Button 
+                size="icon" 
+                onClick={handleWishlistToggle}
+                className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50 transition-all duration-300"
+            >
+              <Heart className={cn("h-4 w-4", isInWishlist(product.id) ? "fill-red-500 text-red-500" : "fill-transparent text-white")} />
+            </Button>
             <Image
               src={product.imageUrls[0]}
               alt={product.name}
@@ -186,8 +193,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               data-ai-hint="product image"
             />
           </div>
-        </CardHeader>
-      </Link>
+        </Link>
+      </CardHeader>
       <CardContent className="p-4 flex-grow">
         <Link href={`/product/${product.id}`} className="block">
           <CardTitle className="text-lg font-medium leading-tight mb-1 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
@@ -209,12 +216,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex flex-wrap gap-2">
-        <div className="flex-grow min-w-[120px]">
+        <div className="w-full">
             {renderCartControls()}
         </div>
-        <Button variant="outline" size="icon" onClick={handleWishlistToggle} className="flex-shrink-0">
-          <Heart className={cn("h-4 w-4", isInWishlist(product.id) && "fill-primary text-primary")} />
-        </Button>
       </CardFooter>
     </Card>
   );
