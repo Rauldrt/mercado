@@ -109,14 +109,13 @@ export default function CheckoutPage() {
     
     orderedItems.forEach(item => {
       const totalItemPrice = item.unitPrice * item.quantity;
-      const presentationText = item.presentation === 'bulk' ? 'Bulto(s)' : 'Unidad(es)';
+      const presentationText = item.presentation === 'bulk' ? 'B' : 'U';
       
       message += `------------------------------\n`;
-      message += `*ID:* ${item.product.id}\n`;
-      message += `*Producto:* ${item.product.name}\n`;
-      message += `*Cantidad:* ${item.quantity} ${presentationText}\n`;
-      message += `*Precio:* $${new Intl.NumberFormat('es-AR').format(item.unitPrice)}\n`;
-      message += `*Total Ítem:* $${new Intl.NumberFormat('es-AR').format(totalItemPrice)}\n`;
+      message += `_ ${item.product.id} - ${item.product.name}\n`;
+      message += `_ ${item.quantity} ${presentationText}\n`;
+      message += `_ $${new Intl.NumberFormat('es-AR').format(item.unitPrice)}\n`;
+      message += `_ $${new Intl.NumberFormat('es-AR').format(totalItemPrice)}\n`;
     });
   
     message += `------------------------------\n\n`;
@@ -334,5 +333,7 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
 
     
