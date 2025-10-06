@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
 import CategoryCarousel from '@/components/products/category-carousel';
+import { Separator } from '@/components/ui/separator';
 
 function AdminProductsPage() {
   const { user, isAuthenticating } = useAuth();
