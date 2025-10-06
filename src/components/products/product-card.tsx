@@ -109,7 +109,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="w-full space-y-2">
             {quantityInCartUnit > 0 && (
                 <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">Unidades:</span>
+                    <span className="text-sm font-medium">UNs:</span>
                     <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDecreaseQuantity('unit')}>
                             <Minus className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
              {quantityInCartBulk > 0 && (
                 <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">Bultos:</span>
+                    <span className="text-sm font-medium">BTs:</span>
                     <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleDecreaseQuantity('bulk')}>
                             <Minus className="h-4 w-4" />
