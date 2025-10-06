@@ -34,11 +34,11 @@ export default function CheckoutPage() {
   const shippingCost = 0; // Removed shipping cost as requested
   
   const handleIncreaseQuantity = (productId: string, currentQuantity: number) => {
-    updateQuantity(productId, currentQuantity + 1);
+    updateQuantity(productId, currentQuantity + 1, 'unit'); // Assuming unit, needs context
   };
   
   const handleDecreaseQuantity = (productId: string, currentQuantity: number) => {
-    updateQuantity(productId, currentQuantity - 1);
+    updateQuantity(productId, currentQuantity - 1, 'unit'); // Assuming unit, needs context
   };
   
   const handleOrderSuccess = async (data: z.infer<typeof checkoutFormSchema>) => {
@@ -103,33 +103,47 @@ export default function CheckoutPage() {
 
   const handleShareWhatsApp = () => {
     if (!customerInfo) return;
-
+  
     const finalTotalForShare = orderedTotalPrice + shippingCost;
-    let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n`;
+    let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n*Detalle de Productos:*\n`;
+    
     orderedItems.forEach(item => {
-      message += `*${item.product.name}* (${item.quantity} ${item.presentation === 'bulk' ? 'Bulto(s)' : 'Unidad(es)'}) - $${new Intl.NumberFormat('es-AR').format(item.unitPrice * item.quantity)}\n`;
+      const totalItemPrice = item.unitPrice * item.quantity;
+      const presentationText = item.presentation === 'bulk' ? 'Bulto(s)' : 'Unidad(es)';
+      
+      message += `------------------------------\n`;
+      message += `*ID:* ${item.product.id}\n`;
+      message += `*Producto:* ${item.product.name}\n`;
+      message += `*Cantidad:* ${item.quantity} ${presentationText}\n`;
+      message += `*Precio:* $${new Intl.NumberFormat('es-AR').format(item.unitPrice)}\n`;
+      message += `*Total Ítem:* $${new Intl.NumberFormat('es-AR').format(totalItemPrice)}\n`;
     });
+  
+    message += `------------------------------\n\n`;
+  
     if (orderComment) {
-      message += `\n_Comentario del pedido: ${orderComment}_\n`;
+      message += `*Comentario del pedido:*\n_${orderComment}_\n\n`;
     }
-    message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
+  
+    message += `*Resumen de Totales:*\n`;
+    message += `Subtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}\n`;
     
     if (shippingCost > 0) {
-        message += `\nEnvío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}`;
+        message += `Envío: $${new Intl.NumberFormat('es-AR').format(shippingCost)}\n`;
     }
     
-    message += `\n*Total: $${new Intl.NumberFormat('es-AR').format(finalTotalForShare)}*`;
+    message += `*Total a Pagar: $${new Intl.NumberFormat('es-AR').format(finalTotalForShare)}*\n\n`;
     
-    message += `\n\n*Datos de Envío:*`;
-    message += `\nNombre: ${customerInfo.firstName} ${customerInfo.lastName}`;
-    message += `\nDirección: ${customerInfo.address}, ${customerInfo.city}`;
-
+    message += `*Datos de Envío:*\n`;
+    message += `Nombre: ${customerInfo.firstName} ${customerInfo.lastName}\n`;
+    message += `Dirección: ${customerInfo.address}, ${customerInfo.city}\n`;
+  
     if (customerInfo.gpsLocation) {
         const [lat, lng] = customerInfo.gpsLocation.split(',').map(s => s.trim());
         const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        message += `\nUbicación: ${mapsLink}`;
+        message += `Ubicación: ${mapsLink}\n`;
     }
-
+  
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -320,7 +334,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
 
     

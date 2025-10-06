@@ -1,8 +1,8 @@
 {
-  "/page": "app/page.js",
   "/admin/products/page": "app/admin/products/page.js",
-  "/checkout/page": "app/checkout/page.js",
   "/admin/orders/page": "app/admin/orders/page.js",
   "/admin/catalog/page": "app/admin/catalog/page.js",
-  "/vendor/[vendorName]/page": "app/vendor/[vendorName]/page.js"
+  "/vendor/[vendorName]/page": "app/vendor/[vendorName]/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
 }
