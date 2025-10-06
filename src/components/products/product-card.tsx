@@ -31,6 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   
   const quantityInCartUnit = getItemQuantity(product.id, 'unit');
   const quantityInCartBulk = getItemQuantity(product.id, 'bulk');
+  const isProductInCart = quantityInCartUnit > 0 || quantityInCartBulk > 0;
   const hasBulkOption = product.unitsPerBulk && product.unitsPerBulk > 1;
 
   const handleAddToCart = (presentation: 'unit' | 'bulk') => {
@@ -165,7 +166,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group">
+    <Card className={cn(
+        "overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col group",
+        isProductInCart && "border-2 border-primary shadow-[0_0_15px_-3px_hsl(var(--primary))]"
+    )}>
       <CardHeader className="p-0">
         <Link href={`/product/${product.id}`} className="block">
           <div className="aspect-square relative overflow-hidden">
