@@ -18,10 +18,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Customer, CartItem } from '@/lib/types';
 import type { z } from 'zod';
 import type { checkoutFormSchema } from '@/components/checkout/checkout-form';
-import { Input } from '@/components/ui/input';
 
 export default function CheckoutPage() {
-  const { cartItems, totalPrice, cartCount, updateQuantity, updateComment, clearCart } = useCart();
+  const { cartItems, totalPrice, cartCount, updateQuantity, clearCart } = useCart();
   const { user } = useAuth();
   const [showPostOrderActions, setShowPostOrderActions] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<Partial<Customer> | null>(null);
@@ -29,6 +28,7 @@ export default function CheckoutPage() {
   // State to hold the order details at the moment of purchase
   const [orderedItems, setOrderedItems] = useState<CartItem[]>([]);
   const [orderedTotalPrice, setOrderedTotalPrice] = useState(0);
+  const [orderComment, setOrderComment] = useState('');
   const [orderDetailsForPdf, setOrderDetailsForPdf] = useState<{orderId: string, date: string} | null>(null);
 
   const shippingCost = 0; // Removed shipping cost as requested
@@ -47,6 +47,7 @@ export default function CheckoutPage() {
     
     setOrderedItems([...cartItems]); // Snapshot the cart items
     setOrderedTotalPrice(totalPrice); // Snapshot the total price
+    setOrderComment(data.orderComment || '');
     setOrderDetailsForPdf({ orderId, date: orderDate });
     
     try {
@@ -65,6 +66,7 @@ export default function CheckoutPage() {
         date: orderDate,
         total: totalPrice + shippingCost,
         items: cartItems,
+        orderComment: data.orderComment,
       };
 
       const updatedHistory = [...(selectedCustomer.purchaseHistory || []), newPurchase];
@@ -103,10 +105,10 @@ export default function CheckoutPage() {
     let message = `¡Hola ${customerInfo.firstName}! Te comparto el resumen de tu pedido:\n\n`;
     orderedItems.forEach(item => {
       message += `*${item.product.name}* (x${item.quantity}) - $${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}\n`;
-      if (item.comment) {
-        message += `  _Comentario: ${item.comment}_\n`;
-      }
     });
+    if (orderComment) {
+      message += `\n_Comentario del pedido: ${orderComment}_\n`;
+    }
     message += `\nSubtotal: $${new Intl.NumberFormat('es-AR').format(orderedTotalPrice)}`;
     
     // Only add shipping if it's greater than 0
@@ -166,6 +168,12 @@ export default function CheckoutPage() {
                   <p style={{ margin: '0' }}><strong>Email:</strong> {customerInfo.email}</p>
               </div>
           )}
+          {orderComment && (
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #EEE' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>Comentario del Pedido:</h3>
+                <p style={{ margin: '0', fontStyle: 'italic' }}>{orderComment}</p>
+            </div>
+          )}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
               <thead style={{ backgroundColor: '#EEE' }}>
                   <tr>
@@ -180,7 +188,6 @@ export default function CheckoutPage() {
                       <tr key={item.product.id}>
                           <td style={{ padding: '10px', borderBottom: '1px solid #EEE' }}>
                             {item.product.name}
-                            {item.comment && <div style={{fontSize: '12px', color: '#555'}}><em>Comentario: {item.comment}</em></div>}
                           </td>
                           <td style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #EEE' }}>{item.quantity}</td>
                           <td style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #EEE' }}>${new Intl.NumberFormat('es-AR').format(item.product.price)}</td>
@@ -254,20 +261,6 @@ export default function CheckoutPage() {
                                 </div>
                                 <p className="font-semibold">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
                             </div>
-                            {!showPostOrderActions && cartCount > 0 && (
-                                <Input
-                                    type="text"
-                                    placeholder="Añadir comentario (opcional)..."
-                                    value={item.comment || ''}
-                                    onChange={(e) => updateComment(item.product.id, e.target.value)}
-                                    className="text-sm"
-                                />
-                            )}
-                             {showPostOrderActions && item.comment && (
-                                <p className="text-sm text-muted-foreground pl-2 border-l-2 ml-2">
-                                   <span className="font-medium">Comentario:</span> {item.comment}
-                                </p>
-                            )}
                         </div>
                     ))}
                     <Separator />
@@ -284,6 +277,12 @@ export default function CheckoutPage() {
                         )}
                     </div>
                      <Separator />
+                     {orderComment && showPostOrderActions && (
+                        <div className="space-y-1">
+                            <p className="font-medium">Comentario del Pedido:</p>
+                            <p className="text-sm text-muted-foreground p-3 bg-secondary rounded-md">{orderComment}</p>
+                        </div>
+                     )}
                 </CardContent>
                 <CardFooter className="pt-4 flex justify-between font-bold text-xl">
                     <span>Total</span>
@@ -309,5 +308,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    

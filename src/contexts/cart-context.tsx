@@ -11,7 +11,6 @@ interface CartContextType {
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
-  updateComment: (productId: string, comment: string) => void;
   clearCart: () => void;
   cartCount: number;
   totalPrice: number;
@@ -61,7 +60,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             : item
         );
       }
-      return [...prevItems, { product, quantity, comment: '' }];
+      return [...prevItems, { product, quantity }];
     });
   }, []);
 
@@ -80,14 +79,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   }, [removeFromCart]);
-  
-  const updateComment = useCallback((productId: string, comment: string) => {
-    setCartItems(prevItems => {
-      return prevItems.map(item =>
-        item.product.id === productId ? { ...item, comment } : item
-      );
-    });
-  }, []);
 
   const getItemQuantity = useCallback((productId: string) => {
     const item = cartItems.find(item => item.product.id === productId);
@@ -109,7 +100,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
-    updateComment,
     clearCart,
     cartCount,
     totalPrice,

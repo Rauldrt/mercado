@@ -28,9 +28,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Textarea } from '../ui/textarea';
 
 export const checkoutFormSchema = z.object({
   customerId: z.string().min(1, { message: 'Debes seleccionar un cliente.' }),
+  orderComment: z.string().optional(),
   paymentMethod: z.enum(['digital_wallet', 'credit_card', 'cash'], {
     required_error: "Debes seleccionar un método de pago."
   }),
@@ -61,6 +63,7 @@ export default function CheckoutForm({
     resolver: zodResolver(checkoutFormSchema),
     defaultValues: {
       customerId: '',
+      orderComment: '',
     },
   });
 
@@ -114,7 +117,7 @@ export default function CheckoutForm({
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Seleccionar Cliente</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCustomers}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCustomers || showPostOrderActions}>
                             <FormControl>
                             <SelectTrigger>
                                 {loadingCustomers ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -132,6 +135,24 @@ export default function CheckoutForm({
                         <FormMessage />
                         </FormItem>
                     )}
+                />
+                <FormField
+                  control={form.control}
+                  name="orderComment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Comentarios del Pedido (Opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Añadir notas sobre el pedido, la entrega, etc."
+                          className="resize-none"
+                          disabled={showPostOrderActions}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
             </CardContent>
         </Card>
@@ -154,6 +175,7 @@ export default function CheckoutForm({
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
                                     className="flex flex-col space-y-2 pt-2"
+                                    disabled={showPostOrderActions}
                                     >
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="digital_wallet" /></FormControl>
