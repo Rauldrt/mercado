@@ -76,6 +76,12 @@ const nextConfig = {
         hostname: 'arjosimarprod.vtexassets.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'sumerlabs.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
