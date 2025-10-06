@@ -198,13 +198,13 @@ export default function AdminOrdersTable({ orders, onOrderUpdate, onOrderDelete 
               <div className="space-y-3">
                  {selectedOrder.items && selectedOrder.items.map(item => (
                     <div key={item.product.id} className="flex items-start gap-4">
-                        <div className="relative h-14 w-14 rounded-md overflow-hidden flex-shrink-0">
+                        <div className="relative h-12 w-12 rounded-md overflow-hidden flex-shrink-0">
                             <Image 
                                 src={item.product.imageUrls[0]}
                                 alt={item.product.name}
                                 fill
                                 className="object-cover"
-                                sizes="56px"
+                                sizes="48px"
                             />
                         </div>
                         <div className="flex-grow space-y-1">
