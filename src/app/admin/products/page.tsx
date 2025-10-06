@@ -116,7 +116,6 @@ function AdminProductsPage() {
         {categories.length > 0 && (
             <div className="sticky top-16 z-30 -mx-4 bg-background/95 pb-4 pt-4 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
                  <div className="container mx-auto px-4">
-                    <h3 className="mb-4 text-center text-lg font-semibold font-headline">Explora por Categoría</h3>
                     <CategoryCarousel
                         categories={categories}
                         selectedCategory={selectedCategory}
