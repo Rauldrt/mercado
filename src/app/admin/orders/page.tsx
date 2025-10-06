@@ -4,7 +4,7 @@
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Loader2, Search, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Search, Calendar as CalendarIcon, Filter } from "lucide-react";
 import AdminOrdersTable from '@/components/admin/orders-table';
 import { getCustomers, updateCustomerOrders } from '@/lib/firebase';
 import type { Customer, Order as PurchaseOrder } from '@/lib/types';
@@ -16,6 +16,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export type Order = PurchaseOrder & {
     customerName: string;
@@ -29,6 +30,7 @@ function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pendiente' | 'completado' | 'cancelado'>('all');
   const { toast } = useToast();
 
   const fetchOrders = useCallback(async () => {
@@ -90,6 +92,10 @@ function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     let orders = allOrders;
 
+    if (statusFilter !== 'all') {
+        orders = orders.filter(order => (order.status || 'pendiente') === statusFilter);
+    }
+
     if (dateRange?.from) {
         const fromDate = new Date(dateRange.from);
         fromDate.setHours(0, 0, 0, 0);
@@ -117,7 +123,7 @@ function AdminOrdersPage() {
         }
     }
     return orders;
-  }, [allOrders, searchQuery, dateRange]);
+  }, [allOrders, searchQuery, dateRange, statusFilter]);
 
   if (isAuthenticating || !user) {
     return (
@@ -147,39 +153,53 @@ function AdminOrdersPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className="w-full md:w-auto justify-start text-left font-normal"
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? (
-                    dateRange.to ? (
-                        <>
-                        {format(dateRange.from, "LLL dd, y", { locale: es })} -{" "}
-                        {format(dateRange.to, "LLL dd, y", { locale: es })}
-                        </>
-                    ) : (
-                        format(dateRange.from, "LLL dd, y", { locale: es })
-                    )
-                    ) : (
-                    <span>Filtrar por fecha</span>
-                    )}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={2}
-                    locale={es}
-                />
-                </PopoverContent>
-            </Popover>
+            <div className="flex gap-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className="w-full md:w-auto justify-start text-left font-normal"
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                        dateRange.to ? (
+                            <>
+                            {format(dateRange.from, "LLL dd, y", { locale: es })} -{" "}
+                            {format(dateRange.to, "LLL dd, y", { locale: es })}
+                            </>
+                        ) : (
+                            format(dateRange.from, "LLL dd, y", { locale: es })
+                        )
+                        ) : (
+                        <span>Filtrar por fecha</span>
+                        )}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                        locale={es}
+                    />
+                    </PopoverContent>
+                </Popover>
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                        <Filter className="mr-2 h-4 w-4" />
+                        <SelectValue placeholder="Filtrar por estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos los estados</SelectItem>
+                        <SelectItem value="pendiente">Pendiente</SelectItem>
+                        <SelectItem value="completado">Completado</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
 
         {loading ? (
