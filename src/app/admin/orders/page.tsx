@@ -99,7 +99,7 @@ function AdminOrdersPage() {
     }
 
     const dataForCsv = filteredOrders.flatMap(order => 
-        order.items.map(item => ({
+        (order.items || []).map(item => ({
             'ID Pedido': order.orderId,
             'Fecha': new Date(order.date).toLocaleString('es-AR'),
             'Estado': order.status || 'pendiente',
@@ -151,7 +151,7 @@ function AdminOrdersPage() {
         const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.trim() !== '');
         if (searchTerms.length > 0) {
             orders = orders.filter(order => {
-                const productText = order.items.map(item => `${item.product.name.toLowerCase()} ${item.product.id.toLowerCase()}`).join(' ');
+                const productText = (order.items || []).map(item => `${item.product.name.toLowerCase()} ${item.product.id.toLowerCase()}`).join(' ');
                 const orderText = `
                     ${order.orderId.toLowerCase()}
                     ${order.customerName.toLowerCase()}
