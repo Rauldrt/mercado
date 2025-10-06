@@ -1,9 +1,8 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import type { Customer, CartItem } from "@/lib/types";
-import { getCustomers } from "@/lib/firebase";
 import {
   Table,
   TableBody,
@@ -20,8 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Eye } from "lucide-react";
 import Image from "next/image";
 import { Separator } from "../ui/separator";
 
@@ -36,62 +34,24 @@ type Order = {
     customerId: string;
 }
 
-export default function AdminOrdersTable() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+interface AdminOrdersTableProps {
+    orders: Order[];
+}
+
+export default function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailViewOpen, setDetailViewOpen] = useState(false);
-  const { toast } = useToast();
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      const customers = await getCustomers();
-      const allOrders: Order[] = [];
-      customers.forEach((customer: Customer) => {
-        if (customer.purchaseHistory) {
-          customer.purchaseHistory.forEach(purchase => {
-            allOrders.push({
-              ...purchase,
-              customerName: `${customer.firstName} ${customer.lastName}`,
-              customerId: customer.id,
-            });
-          });
-        }
-      });
-      // Sort orders by date, newest first
-      allOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setOrders(allOrders);
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      toast({ variant: "destructive", title: "Error", description: "No se pudieron cargar los pedidos." });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-  
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     setDetailViewOpen(true);
-  }
-
-  if (loading) {
-    return (
-        <div className="flex justify-center items-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-    )
   }
   
   if (orders.length === 0) {
     return (
         <div className="text-center py-10 border-2 border-dashed rounded-lg">
-            <h3 className="text-xl font-semibold">No hay pedidos todavía</h3>
-            <p className="text-muted-foreground mt-2">Cuando se cree el primer pedido, aparecerá aquí.</p>
+            <h3 className="text-xl font-semibold">No se encontraron pedidos</h3>
+            <p className="text-muted-foreground mt-2">Intenta ajustar tu búsqueda o filtros.</p>
         </div>
     )
   }
@@ -154,10 +114,10 @@ export default function AdminOrdersTable() {
                         <div className="flex-grow space-y-1">
                             <p className="font-medium">{item.product.name}</p>
                             <p className="text-sm text-muted-foreground">
-                                {item.quantity} x ${new Intl.NumberFormat('es-AR').format(item.product.price)}
+                                {item.quantity} x ${new Intl.NumberFormat('es-AR').format(item.unitPrice)}
                             </p>
                         </div>
-                        <p className="font-semibold text-sm">${new Intl.NumberFormat('es-AR').format(item.product.price * item.quantity)}</p>
+                        <p className="font-semibold text-sm">${new Intl.NumberFormat('es-AR').format(item.unitPrice * item.quantity)}</p>
                     </div>
                  ))}
                  {!selectedOrder.items && (
@@ -182,5 +142,3 @@ export default function AdminOrdersTable() {
     </div>
   );
 }
-
-    
