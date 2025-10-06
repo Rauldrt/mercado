@@ -52,6 +52,12 @@ const nextConfig = {
         hostname: 'elnenearg.vtexassets.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lacoopeencasa.coop',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
