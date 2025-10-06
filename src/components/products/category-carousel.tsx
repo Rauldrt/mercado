@@ -24,7 +24,7 @@ const categoryIcons: { [key: string]: React.ElementType } = {
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 17v-2a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2Z" />
       <path d="M15 13V5a2 2 0 0 0-2-2H8.5a2.5 2.5 0 0 0 0 5H13" />
-      <path d="m4.42 12.3 1.42 1.42" />
+      <path d="m4.42 12.3 l1.42 1.42" />
       <path d="M22 17H4.5" />
     </svg>
   ),
@@ -39,7 +39,6 @@ export default function CategoryCarousel({ categories, selectedCategory, onCateg
 
   return (
      <div>
-        <h3 className="text-lg font-semibold mb-4 text-center font-headline">Explora por Categoría</h3>
         <Carousel
           opts={{
             align: "start",

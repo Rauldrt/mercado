@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect, useMemo } from 'react';
@@ -112,17 +113,20 @@ function AdminProductsPage() {
             </div>
         </div>
         
-        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 -mx-4 -mt-4 mb-8 pt-4 pb-4">
-            {categories.length > 0 && (
-                <div className="container mx-auto px-4">
-                    <CategoryCarousel
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onCategorySelect={handleCategorySelect}
-                    />
+        {categories.length > 0 && (
+            <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4 text-center font-headline">Explora por Categoría</h3>
+                <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 -mx-4 pt-4 pb-4">
+                    <div className="container mx-auto px-4">
+                        <CategoryCarousel
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onCategorySelect={handleCategorySelect}
+                        />
+                    </div>
                 </div>
-            )}
-        </div>
+            </div>
+        )}
         
         <div className="pt-4">
             {filteredProducts.length > 0 ? (
