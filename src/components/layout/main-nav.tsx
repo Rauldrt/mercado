@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 interface MainNavProps {
   vertical?: boolean;
@@ -12,6 +13,8 @@ interface MainNavProps {
 
 export default function MainNav({ vertical = false, onClose }: MainNavProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const ADMIN_EMAIL = 'rauldrt5@gmail.com';
 
   const linkClass = (href: string) => {
     // A special case for the homepage to avoid it being active for all routes.
@@ -52,9 +55,11 @@ export default function MainNav({ vertical = false, onClose }: MainNavProps) {
        <Link href="/admin/orders" className={linkClass("/admin/orders")} onClick={handleLinkClick}>
         Pedidos
       </Link>
-      <Link href="/admin/catalog" className={linkClass("/admin/catalog")} onClick={handleLinkClick}>
-        Catálogo
-      </Link>
+      {user?.email === ADMIN_EMAIL && (
+        <Link href="/admin/catalog" className={linkClass("/admin/catalog")} onClick={handleLinkClick}>
+          Catálogo
+        </Link>
+      )}
     </nav>
   );
 }

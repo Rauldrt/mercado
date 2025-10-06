@@ -21,6 +21,7 @@ function AdminCatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'hidden'>('all');
+  const ADMIN_EMAIL = 'rauldrt5@gmail.com';
 
 
   const fetchAndSetProducts = async () => {
@@ -36,10 +37,14 @@ function AdminCatalogPage() {
   }
 
   useEffect(() => {
-    if (!isAuthenticating && !user) {
-      router.push('/login');
-    } else if(user) {
+    if (!isAuthenticating) {
+      if (!user) {
+        router.push('/login');
+      } else if (user.email !== ADMIN_EMAIL) {
+        router.push('/');
+      } else {
         fetchAndSetProducts();
+      }
     }
   }, [user, isAuthenticating, router]);
 
@@ -78,7 +83,7 @@ function AdminCatalogPage() {
     });
   }, [searchQuery, products, categoryFilter, visibilityFilter]);
 
-  if (isAuthenticating || !user || loading) {
+  if (isAuthenticating || !user || user.email !== ADMIN_EMAIL || loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="text-center">

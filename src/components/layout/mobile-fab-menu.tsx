@@ -11,13 +11,14 @@ import { useAuth } from '@/contexts/auth-context';
 export default function MobileFabMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const ADMIN_EMAIL = 'rauldrt5@gmail.com';
 
   const menuItems = [
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/admin/customers', label: 'Clientes', icon: Users },
     { href: '/admin/products', label: 'Nuevo Pedido', icon: FilePlus },
     { href: '/admin/orders', label: 'Pedidos', icon: ListOrdered },
-    { href: '/admin/catalog', label: 'Catálogo', icon: Package },
+    ...(user?.email === ADMIN_EMAIL ? [{ href: '/admin/catalog', label: 'Catálogo', icon: Package }] : [])
   ];
   
   if (!user) return null;
