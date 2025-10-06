@@ -197,18 +197,18 @@ export default function ProductCard({ product }: ProductCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <Link href={`/product/${product.id}`} className="block">
-          <CardTitle className="text-lg font-medium leading-tight mb-1 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
+          <CardTitle className="text-base font-medium leading-tight mb-1 font-headline hover:text-primary transition-colors">{product.name}</CardTitle>
         </Link>
         <Link href={`/vendor/${encodeURIComponent(product.vendor)}`} className="block">
             <CardDescription className="text-sm text-muted-foreground mb-2 hover:text-primary hover:underline">{product.vendor}</CardDescription>
         </Link>
         <div className="flex flex-col">
-            <p className="text-2xl font-bold text-foreground">
+            <p className="text-xl font-bold text-foreground">
                 ${new Intl.NumberFormat('es-AR').format(product.price)}
-                <span className="text-sm font-normal text-muted-foreground"> /unidad</span>
+                <span className="text-xs font-normal text-muted-foreground"> /unidad</span>
             </p>
             {hasBulkOption && (
-                <p className="text-sm font-semibold text-muted-foreground">
+                <p className="text-xs font-semibold text-muted-foreground">
                     ${new Intl.NumberFormat('es-AR').format(product.price * (product.unitsPerBulk || 1))}
                     <span className="font-normal"> /bulto ({product.unitsPerBulk} u.)</span>
                 </p>
