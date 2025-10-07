@@ -180,6 +180,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.greenco.com.ar',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
