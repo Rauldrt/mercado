@@ -186,6 +186,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn1.kilbelonline.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
