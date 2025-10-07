@@ -137,7 +137,13 @@ const nextConfig = {
         hostname: 'masonlineprod.vtexassets.com',
         port: '',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'supercristian.com.ar',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
