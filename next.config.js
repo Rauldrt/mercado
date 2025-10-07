@@ -144,6 +144,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'static.cotodigital3.com.ar',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
