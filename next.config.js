@@ -181,7 +181,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https',"use client";
         hostname: 'www.greenco.com.ar',
         port: '',
         pathname: '/**',
@@ -189,6 +189,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn1.kilbelonline.com',
+        port: '',
+        pathname: '/**',
+      },
+       {
+        protocol: 'https',
+        hostname: 'dequesos.com.ar',
         port: '',
         pathname: '/**',
       },
