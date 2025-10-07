@@ -181,7 +181,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',"use client";
+        protocol: 'https',
         hostname: 'www.greenco.com.ar',
         port: '',
         pathname: '/**',
