@@ -168,6 +168,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'carniceriamarber.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
