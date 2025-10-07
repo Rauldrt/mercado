@@ -174,6 +174,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.elbierzo.com.ar',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
