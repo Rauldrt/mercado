@@ -150,10 +150,14 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.golomax.com.ar',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
 
 module.exports = withPWA(nextConfig);
-
-    
