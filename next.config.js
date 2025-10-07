@@ -156,6 +156,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.casa-segal.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
